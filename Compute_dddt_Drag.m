@@ -1,4 +1,4 @@
-function Compute_dddt_Drag(D,B_n,B_d,n,L0,D0,drho,etaUM,tau0,name_1)
+function Testdata = Compute_dddt_Drag(D,B_n,B_d,n,L0,D0,drho,etaUM,tau0,name_1)
 %Compute the D,t of the slab detachment. 
 % Input Parameter: D0 = initial length 
 %                  L0 = initial length
@@ -36,16 +36,17 @@ dDdtA = fzero(FUNFzero,dDdt0);
 % Create function handle 
 Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,B_n,B_d,n,etaUM,drho,D0,L0)
 % Set the option for resolving the system of equation
-options = odeset('RelTol',5e-2,'NormControl','on');
+options = odeset('RelTol',8e-2,'NormControl','on');
 % resolve the system
 [t,D] = ode15i(Funf_wi,[0 20*td],D0, dDdtA,options);
 
 D_norm = D/D0;
 tau_norm = 1./D_norm;
 
-plot_time_evolution(t/td,D_norm,'D',append('D',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
-plot_time_evolution(t/td,tau_norm,'tau',append('tau',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
-
+%plot_time_evolution(t/td,D_norm,'D',append('D',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
+%plot_time_evolution(t/td,tau_norm,'tau',append('tau',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
+Testdata(1,:)=t/tc;
+Testdata(2,:)=D_norm;
 
 
 end
@@ -57,7 +58,7 @@ function [dDdt0] = compute_guess_ddt(D,B_n,B_d,n,drho,L0,D0)
 
 tau = (drho*D0*L0*9.81)/2/D;
 
-dDdt0 = (-D*(B_n*tau^n+B_d*tau))/5;
+dDdt0 = (-D*(B_n*tau^n+B_d*tau));
 
 
 end
@@ -95,6 +96,7 @@ if strcmp(name,"D")
     anal = (1-n.*tt).^(1/n);
     plot(tt.*n,anal,'r')
     scatter(tt(400:400:end).*n,anal(400:400:end),'d')
+    set(gca, 'YScale', 'log')
 end
 xlim([0,10])
 xlabel('t/td [n.d.]')
@@ -105,8 +107,10 @@ close;
 end
 
 function [tau_eff] = compute_the_effective_stress(D,dDdt,drho,D0,L0,etaUM,alpha)
+l = L0/1000e3;
+
 tau_B = (drho*D0*L0*9.81)/2/D;
-tau_D = (4*etaUM*alpha*(D0^2/D^2)*dDdt)/2/D;
+tau_D = (2*etaUM*alpha*(D0^2/D^2)*dDdt*l)/2/D;
 tau_eff = tau_B+tau_D;
 end
 
