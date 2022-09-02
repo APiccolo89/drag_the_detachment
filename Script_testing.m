@@ -7,14 +7,14 @@ clf
 
 eta0 = 1e21; 
 eta0D = 10*eta0;
-L0    = 500e3;
+L0    = 300e3;
 D0    = 80e3; 
 n     = 3.5; 
 tau0  = 100e6;
 drho   = 2*tau0/(9.81*L0);
 B_n   = tau0^(1-n)/eta0;
 B_d   = 1/eta0D; 
-etaUM_vec =10.^(17:0.1:20); 
+etaUM_vec =10.^(16:0.1:20); 
 name_1 = num2str(log10(eta0));
 
 D = D0;
@@ -38,7 +38,7 @@ D = TD(2,:);
 hold on 
 plot(T,D,'Color',cc(i,:))
 
-set(gca, 'YScale', 'log')
+%set(gca, 'YScale', 'log')
 grid on 
 xlim([0,10])
 ylim([10^(-2),10^(0)])

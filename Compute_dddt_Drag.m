@@ -45,7 +45,7 @@ tau_norm = 1./D_norm;
 
 %plot_time_evolution(t/td,D_norm,'D',append('D',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
 %plot_time_evolution(t/td,tau_norm,'tau',append('tau',name_1,'_',num2str(L0),'_',num2str(D0),'_',num2str(log10(etaUM))),n)
-Testdata(1,:)=t/tc;
+Testdata(1,:)=t/td;
 Testdata(2,:)=D_norm;
 
 
