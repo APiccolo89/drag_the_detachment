@@ -22,7 +22,7 @@ function Testdata = Run_Simulation_Drag(ID)
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 5*ID.tc],ID.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 100*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
     D_norm = D/ID.D0;
     % save relevant data of the simulation:
@@ -30,7 +30,6 @@ function Testdata = Run_Simulation_Drag(ID)
     Testdata.D_norm = D_norm;
     Testdata.t_det   = te/ID.tc; 
     disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
-    bla = 1.0 
 end
 
 
@@ -95,11 +94,11 @@ end
 % Event detection (not difficult, though, i just copied the matlab help
 % page (which has been copied also by Marcel in his code) 
 function [position,isterminal,direction] = det_EV(t,y,yp0,ID)
-position = y(1)-0.1*ID.D0; % The value that we want to be zero
-% To be precise, each time step y(1) is the actual thickness. so,
-% D(t)-0.1*D0 must be 0 to stop the simulation and having an event. 
-% Additional mistake that I did the function handle must incorporate the
-% derivative too. 
-isterminal = 1;  % Halt integration 
-direction = 0;   % The zero can be approached from either direction
+    position = y(1)-0.1*ID.D0; % The value that we want to be zero
+    % To be precise, each time step y(1) is the actual thickness. so,
+    % D(t)-0.1*D0 must be 0 to stop the simulation and having an event. 
+    % Additional mistake that I did the function handle must incorporate the
+    % derivative too. 
+    isterminal = 1;  % Halt integration 
+    direction = 0;   % The zero can be approached from either direction
 end

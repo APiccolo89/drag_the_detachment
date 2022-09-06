@@ -7,23 +7,24 @@ clf
 % To do: 
 % Generate a data structure and labelling. 
 
-l0_v    = (300e3);                 % initial length
+l0_v    = (300e3:50e3:600e3);                 % initial length
 D0      = 80e3;                  % thickness
 
 % Slab Rheology
-eta0_v = [1e21];                   % [Pas] refernce power law viscosity slab 
-Df   = 10;                     % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
-n     = 3.5;                   % [n.d.] pre-exponential factor
-s0_v  = (100e6);                 % [Pa]  reference buoyancy stress
+eta0_v = [5e21,1e22,5e22,1e23,5e23];                   % [Pas] refernce power law viscosity slab 
+Df   = 10;                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+n     = 3.5;                       % [n.d.] pre-exponential factor
+s0_v  = (100e6:50:300e6);                   % [Pa]  reference buoyancy stress
 
 % Upper Mantle
-etaum_v =10.^(16:0.1:20);    % [Pa.s]vector of the mantle viscosity
+etaum_v =10.^(16:0.1:21);    % [Pa.s]vector of the mantle viscosity
 
 
 
 % Function to run the ensamble of test 
-[Testdata] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v);
+[Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v);
 
+plot_results(Tests)
 
 % Function to plot the results 
 
@@ -32,7 +33,7 @@ etaum_v =10.^(16:0.1:20);    % [Pa.s]vector of the mantle viscosity
 %========================================================================%
 % Function utilities                                                     %
 %========================================================================%
-function [Testdata] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
+function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      % Output:
      % 
@@ -78,7 +79,7 @@ function [Testdata] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
            for z = 1:iuL0
                 l0 = l0_v(z);
                 % Compute the characteristic for the simulation 
-                [drho,B_d,B_n,tc,ec] = Compute_slab_characteristics(eta0,Df,n,l0,s0);
+                [drho,B_d,B_n,tc,ec,Psi,Lambda] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum);
                 % Create a labeling for the simulation
                 str0   = strcat('Sim_D0_',num2str(int16(D0/1e3)));
                 str1   = strcat('em_',num2str(i));
@@ -89,11 +90,13 @@ function [Testdata] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
                 disp(['Simulation ',l_simulation, 'is starting'])
                 % Save into a simple data structure the initial data of
                 % the simulation
-                string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec'};
+                string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda'};
                 
                 for is = 1:numel(string_ID)
                     ID.(string_ID{is}) = eval(string_ID{is});
                 end
+               
+
                 % Run a simulation with a specific combination of parameter               
                 Testdata = Run_Simulation_Drag(ID);
                 % 
@@ -115,13 +118,16 @@ end
 
 
 
-function [drho,B_d,B_n,tc,ec] = Compute_slab_characteristics(eta0,Df,n,l0,s0)
+function [drho,B_d,B_n,tc,ec,Psi,Lambda] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum)
         % Output: 
         % drho = density contrast
         % B_d  = diffusion creep pre-exponential factor
         % B_n  = dislocation creep pre-exponential factor
         % tc   = characteristic time (s)
         % ec   = characterstistc strain rate (1/s)
+        % Psi  = ratio between mantle effetive viscosity and slab effective
+        % viscosity
+        % Lambda = Combination of (l0/s)*(alpha*Psi)/2
         % Input
         % eta0 = reference viscosity at referenc stress
         % s0   = reference stress
@@ -137,49 +143,109 @@ function [drho,B_d,B_n,tc,ec] = Compute_slab_characteristics(eta0,Df,n,l0,s0)
         B_n   = s0^(1-n)/eta0;       % compliance dislocation
         B_d   = 1/(Df*eta0);         % compliance diffusion
         ec    = (B_n*s0^n+B_d*s0);   % characteristic strain rate
-        tc    = 1/ec             ;   % characteristic time scale 
+        tc    = 1/ec             ;   % characteristic time scale
+        etaS_eff = (1/eta0+1/(Df*eta0))^(-1); % effective viscosity of the slab at reference condition
+        Psi      = etaum/etaS_eff;    % ratio between the upper mantle viscosity and the slab viscosity
+        % Alpha 
+        alpha = 5.0;                 % Ancient parameter derived by Yanick et al. 1986
+        Len = l0/(2*1000e3);         % Length divided by a characteristic lenght scale (i.e. size of my model)
+        Lambda = Len*alpha*Psi;      % Parameter derived by 2D numerical simulation 
 
 end
 
 
+function plot_results(Tests)
+    % Input 
+    % Testdata=> Data Structure containing all the tests 
+    % Short description
+    % Plot t/tc - Dnorm of all the tests and colored as a function of
+    % lambda.
+    % Plot td against Lambda scatter plot.
+    % Stress => To Do How to retrieve the stress data per each timestep 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % function plot not dimensional data {+ additional collect data for the scatter plot
+    % i.e. Lambda, t_d,Psi} 
+    [Data_S] =  Plot_1D_Plots(Tests);
+    % function to do scatter plot
+    plot_scatter(Data_S);
 
 
-% 
-% 
-% 
-% for i = 1:length(etaUM_vec)
-%     etaUM = etaUM_vec(i); 
-%     Testdata = Compute_dddt_Drag(D,B_n,B_d,n,L0,D0,drho,etaUM,tau0,name_1);
-%     name_2 = append('T',name_1,num2str(i));
-%     Tests.(name_2) = Testdata;
-%     Testdata = [];
-%     eta_UM = [];  
-% end
-% 
-% 
-% 
-% 
-% % Plot function
-% i = 1 ; 
-% fn = fieldnames(Tests);
-% cc = jet(length(etaUM_vec));
-% for k = 1:numel(fn) 
-% 
-% TD = Tests.(fn{k});
-% T = TD(1,:);
-% D = TD(2,:);
-% hold on 
-% plot(T,D,'Color',cc(i,:))
-% 
-% %set(gca, 'YScale', 'log')
-% grid on 
-% xlim([0,10])
-% ylim([10^(-2),10^(0)])
-% 
-% xlabel('t/tc [n.d.]')
-% 
-% i = i+1; 
-% end
-% print('Global_Test','-dpng')
-% clf; 
-% close; 
+
+end
+
+function [Data_S] = Plot_1D_Plots(Tests)
+
+    % Collect the field names 
+    fn = fieldnames(Tests);
+    % number of test 
+    itest = length(fn);
+    % Prepare Data_S array
+    Data_S = zeros(3,itest); 
+    figure(1)
+    c=colorbar;
+    cmap=colormap('jet');
+    z_min = 10^-5;
+    z_max = 10^-1;
+    caxis([z_min z_max])
+    Ticks=round(log10(z_min)):round(log10(z_max));
+    TickLabels=arrayfun(@(x) sprintf('10^{%d}',x),Ticks,'UniformOutput',false);
+    % Shamelessly copied from https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+    try
+        set(c,'Ticks',Ticks);
+        set(c,'TickLabels',TickLabels);
+    catch %HG1
+        TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+        set(c,'YTick',Ticks);
+        set(c,'YTickLabel',TickLabels);
+    end
+    i = 1; % iterator 
+    for k = 1:numel(fn) 
+       
+       TD = Tests.(fn{k});
+       Data_S(1,i) = TD.initial_data.Lambda;
+       Data_S(2,i) = TD.initial_data.Psi; 
+       Data_S(3,i) = TD.initial_data.n*TD.t_det;
+       % Normalize Lambda value w.r.t. the limit that I assumed to be
+       % likely
+       V = (TD.initial_data.Lambda-10^-9)/(10^1-10^-9);
+       if V<0 
+           V=0;
+       elseif V>0
+            V=1;
+       end
+       V=round(1+V*(size(cmap,1)-1));%round to nearest index
+       C = cmap(V,:);
+       hold on 
+       plot(TD.time*TD.initial_data.n,TD.D_norm,'Color',C)
+       grid on 
+       xlim([0,10])
+ 
+       xlabel('n*(t/tc) [n.d.]')
+ 
+       i = i+1; 
+    end
+    box on
+    print('Global_Test_1D','-dpng')
+    clf; 
+    close;
+    
+end
+
+function plot_scatter(Data_S) 
+
+figure(1)
+scatter(Data_S(1,:),Data_S(3,:),20,Data_S(2,:),'filled','d')
+hold on 
+yline(1.0,'--','Detachment','LineWidth',3)
+colorbar;
+grid on
+box on
+xlabel('\Lambda [n.d.]')
+ylabel('t^O_d/t^P_d [n.d]')
+set(gca, 'XScale', 'log')
+print('Global_Test_Scat','-dpng')
+clf; 
+close;
+
+end 
