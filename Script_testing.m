@@ -12,17 +12,17 @@ D0      = 80e3;                  % thickness
 
 % Slab Rheology
 eta0_v = [5e21,1e22,5e22,1e23,5e23];                   % [Pas] refernce power law viscosity slab 
-Df   = 10;                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+Df_v   = [1.0,2.0,10,20,100];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
 n     = 3.5;                       % [n.d.] pre-exponential factor
-s0_v  = (100e6:50:300e6);                   % [Pa]  reference buoyancy stress
+s0_v  = (100e6:50e6:300e6);                   % [Pa]  reference buoyancy stress
 
 % Upper Mantle
-etaum_v =10.^(16:0.1:21);    % [Pa.s]vector of the mantle viscosity
+etaum_v =10.^(16:0.1:20);    % [Pa.s]vector of the mantle viscosity
 
 
 
 % Function to run the ensamble of test 
-[Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v);
+[Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v);
 
 plot_results(Tests)
 
@@ -33,7 +33,7 @@ plot_results(Tests)
 %========================================================================%
 % Function utilities                                                     %
 %========================================================================%
-function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
+function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v)
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      % Output:
      % 
@@ -62,7 +62,7 @@ function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
      iut0  = length(s0_v) ;      % number of reference buoyancy stresses
      iuet0 = length(eta0_v);     % number of reference viscosities of the slab
      iuL0  = length(l0_v)   ;    % number of tested initial length of the slab
-
+     iuDf  = length(Df_v)   ;    % number of tested viscosity contrast at reference
      if length(n)>1 || length(D0)>1 
         error('You cannot test more than one power law exponent or initial thickness at once')
  
@@ -70,6 +70,7 @@ function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
 
   %loop to construct the initial data to run a simulation (to change into a
   %more performant function)
+  tic
   for i=1:ium
       etaum = etaum_v(i);
       for j = 1:iut0
@@ -78,38 +79,42 @@ function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df,n,s0_v,etaum_v)
             eta0 = eta0_v(k);
            for z = 1:iuL0
                 l0 = l0_v(z);
-                % Compute the characteristic for the simulation 
-                [drho,B_d,B_n,tc,ec,Psi,Lambda] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum);
-                % Create a labeling for the simulation
-                str0   = strcat('Sim_D0_',num2str(int16(D0/1e3)));
-                str1   = strcat('em_',num2str(i));
-                str2   = strcat('s0_',num2str(j));
-                str3   = strcat('eta0_',num2str(k));
-                str4   = strcat('L0_',num2str(z));
-                l_simulation = strcat(str0,str1,str2,str3,str4);
-                disp(['Simulation ',l_simulation, 'is starting'])
-                % Save into a simple data structure the initial data of
-                % the simulation
-                string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda'};
-                
-                for is = 1:numel(string_ID)
-                    ID.(string_ID{is}) = eval(string_ID{is});
-                end
-               
+                for d = 1:iuDf
+                    Df = Df_v(d);
+                    % Compute the characteristic for the simulation 
+                    [drho,B_d,B_n,tc,ec,Psi,Lambda] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum);
+                    % Create a labeling for the simulation
+                    str0   = strcat('Sim_D0_',num2str(int16(D0/1e3)));
+                    str1   = strcat('em_',num2str(i));
+                    str2   = strcat('s0_',num2str(j));
+                    str3   = strcat('eta0_',num2str(k));
+                    str4   = strcat('L0_',num2str(z));
+                    str5   = strcat('Df_',num2str(d));
 
-                % Run a simulation with a specific combination of parameter               
-                Testdata = Run_Simulation_Drag(ID);
-                % 
-                Tests.(l_simulation) = Testdata;
-                Tests.(l_simulation).initial_data = ID; 
-                ID = [];
-                Testdata = []; 
- 
+                    l_simulation = strcat(str0,str1,str2,str3,str4,str5);
+                    disp(['Simulation ',l_simulation, 'is starting'])
+                    % Save into a simple data structure the initial data of
+                    % the simulation
+                    string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda'};
+                    
+                    for is = 1:numel(string_ID)
+                        ID.(string_ID{is}) = eval(string_ID{is});
+                    end
+                   
+    
+                    % Run a simulation with a specific combination of parameter               
+                    Testdata = Run_Simulation_Drag(ID);
+                    % 
+                    Tests.(l_simulation) = Testdata;
+                    Tests.(l_simulation).initial_data = ID; 
+                    ID = [];
+                    Testdata = []; 
+                end
            end
         end
       end
   end
-
+toc
 end
 
 

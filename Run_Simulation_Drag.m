@@ -29,7 +29,8 @@ function Testdata = Run_Simulation_Drag(ID)
     Testdata.time   = t/ID.tc; %time vector divided by the detachment timescale 
     Testdata.D_norm = D_norm;
     Testdata.t_det   = te/ID.tc; 
-    disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
+    
+    %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
 
