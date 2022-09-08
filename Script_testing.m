@@ -12,20 +12,25 @@ D0      = 80e3;                  % thickness
 
 % Slab Rheology
 eta0_v = [5e21,1e22,5e22,1e23,5e23];                   % [Pas] refernce power law viscosity slab 
-Df_v   = [1.0,2.0,10,20,100];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
-n     = 3.5;                       % [n.d.] pre-exponential factor
-s0_v  = (100e6:50e6:300e6);                   % [Pa]  reference buoyancy stress
+Df_v   = [1.0,10,100,1e6];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+n_v     =[2.0, 3.5,7.0,9.0];                       % [n.d.] pre-exponential factor
+s0_v  = [100e6,200e6];                   % [Pa]  reference buoyancy stress
 
 % Upper Mantle
 etaum_v =10.^(16:0.1:20);    % [Pa.s]vector of the mantle viscosity
 
+name_tests_v = {'D0_80km_n_2dot0_Df_EXT','D0_80km_n_3dot5_Df_EXT','D0_80km_n_7dot0_Df_EXT','D0_80km_n_9dot0_Df_EXT'};
 
 
-% Function to run the ensamble of test 
-[Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v);
+for i=1:4
+    name_tests = name_tests_v{i};
+    n = n_v(i)
 
-plot_results(Tests)
+    % Function to run the ensamble of test 
+    [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v);
 
+    plot_results(Tests,name_tests)
+end
 % Function to plot the results 
 
 
@@ -159,7 +164,7 @@ function [drho,B_d,B_n,tc,ec,Psi,Lambda] = Compute_slab_characteristics(eta0,Df,
 end
 
 
-function plot_results(Tests)
+function plot_results(Tests,name)
     % Input 
     % Testdata=> Data Structure containing all the tests 
     % Short description
@@ -171,15 +176,15 @@ function plot_results(Tests)
     
     % function plot not dimensional data {+ additional collect data for the scatter plot
     % i.e. Lambda, t_d,Psi} 
-    [Data_S] =  Plot_1D_Plots(Tests);
+    [Data_S] =  Plot_1D_Plots(Tests,name);
     % function to do scatter plot
-    plot_scatter(Data_S);
+    plot_scatter(Data_S,name);
 
 
 
 end
 
-function [Data_S] = Plot_1D_Plots(Tests)
+function [Data_S] = Plot_1D_Plots(Tests,name)
 
     % Collect the field names 
     fn = fieldnames(Tests);
@@ -209,7 +214,7 @@ function [Data_S] = Plot_1D_Plots(Tests)
        
        TD = Tests.(fn{k});
        Data_S(1,i) = TD.initial_data.Lambda;
-       Data_S(2,i) = TD.initial_data.Psi; 
+       Data_S(2,i) = TD.initial_data.Df; 
        Data_S(3,i) = TD.initial_data.n*TD.t_det;
        % Normalize Lambda value w.r.t. the limit that I assumed to be
        % likely
@@ -231,13 +236,14 @@ function [Data_S] = Plot_1D_Plots(Tests)
        i = i+1; 
     end
     box on
-    print('Global_Test_1D','-dpng')
+    name_picture = strcat('Global_test1D',name);
+    print(name_picture,'-dpng')
     clf; 
     close;
     
 end
 
-function plot_scatter(Data_S) 
+function plot_scatter(Data_S,name) 
 
 figure(1)
 scatter(Data_S(1,:),Data_S(3,:),20,Data_S(2,:),'filled','d')
@@ -248,8 +254,10 @@ grid on
 box on
 xlabel('\Lambda [n.d.]')
 ylabel('t^O_d/t^P_d [n.d]')
+ylim([0.8,20])
 set(gca, 'XScale', 'log')
-print('Global_Test_Scat','-dpng')
+name_picture = strcat('Global_testScat',name);
+print(name_picture,'-dpng')
 clf; 
 close;
 
