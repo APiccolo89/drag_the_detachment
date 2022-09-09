@@ -24,12 +24,33 @@ function Testdata = Run_Simulation_Drag(ID)
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 100*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
-    D_norm = D/ID.D0;
+    % Function to post process the stress, strain and so forth
+    % place holder
     % save relevant data of the simulation:
-    Testdata.time   = t/ID.tc; %time vector divided by the detachment timescale 
-    Testdata.D_norm = D_norm;
+    D_cen = 0.5*(D(1:1:end-1)+D(2:1:end));
+    t_c   = 0.5*(t(1:1:end-1)+t(2:1:end));
+    dDdt_c = (D(2:1:end)-D(1:end-1))./(t(2:1:end)-t(1:1:end-1));
+    t_B    = (ID.drho*ID.D0*ID.l0*9.81)./2./D_cen;
+    t_D    = (2*ID.etaum*5.0.*(ID.D0^2./D_cen.^2).*dDdt_c*ID.l0/1e6)./2./D_cen;
+    if (isreal(D)==0);
+        bla= 1.0;
+    end
+
+    Testdata.time   = t_c/ID.tc; %time vector divided by the detachment timescale 
+    Testdata.D_norm = D_cen/ID.D0;
     Testdata.t_det   = te/ID.tc; 
     
+
+    Testdata.tau(1,:) = t_B./ID.s0;
+    Testdata.tau(2,:) = t_D./ID.s0;
+    Testdata.tau(3,:) = (t_B+t_D)./ID.s0;
+    % Find the max tau eff
+    t_t_max = max(Testdata.tau(3,:));
+    ind     = find(Testdata.tau(3,:)==t_t_max);
+    time_t_M = t_c(ind);
+    Testdata.t_t_max = t_t_max;
+    Testdata.time_t_M = time_t_M./ID.tc; 
+    Testdata.t_t_det  = Testdata.tau(3,end);
     %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
