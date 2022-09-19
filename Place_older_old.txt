@@ -22,7 +22,7 @@ function Testdata = Run_Simulation_Drag(ID)
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 100*ID.tc],ID.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 1000*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
     % Function to post process the stress, strain and so forth
     % place holder
@@ -32,15 +32,13 @@ function Testdata = Run_Simulation_Drag(ID)
     dDdt_c = (D(2:1:end)-D(1:end-1))./(t(2:1:end)-t(1:1:end-1));
     t_B    = (ID.drho*ID.D0*ID.l0*9.81)./2./D_cen;
     t_D    = (2*ID.etaum*5.0.*(ID.D0^2./D_cen.^2).*dDdt_c*ID.l0/1e6)./2./D_cen;
-    if (isreal(D)==0);
+    if (isreal(D)==0)
         bla= 1.0;
     end
 
     Testdata.time   = t_c/ID.tc; %time vector divided by the detachment timescale 
     Testdata.D_norm = D_cen/ID.D0;
-    Testdata.t_det   = te/ID.tc; 
-    
-
+    Testdata.t_det   = te/ID.tc;
     Testdata.tau(1,:) = t_B./ID.s0;
     Testdata.tau(2,:) = t_D./ID.s0;
     Testdata.tau(3,:) = (t_B+t_D)./ID.s0;

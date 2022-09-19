@@ -1,0 +1,39 @@
+function [epsilon_eff,eps_dif,eps_dis] = Compute_Strain(ID,tau_eff)
+if nargin == 0 
+    %Default value compute using 100e6 reference stress, and reference
+    %viscosity 10e21 dislocation, 10e22 diffusion creep. 
+    B_n = 5.00E-42;
+    B_d = 5.00E-23;
+    n   = 3.5;
+    check_eff = 5.50E-14;
+    %non dimensional 
+    B_d = B_d/((100e6)^(-1)*check_eff)
+else
+    B_n = ID.B_n;
+    B_d = ID.B_d;
+    n   = ID.n  ;
+end
+% peirls creep place holder
+%B_p = ID.B_p; 
+
+% Compute dislocation creep 
+eps_dis = Compute_strain_m(B_n,tau_eff,n) 
+% Compute diffusion creep 
+eps_dif = Compute_strain_m(B_d,tau_eff)
+% Compute peirls creep 
+%place holder
+
+end
+
+function [eps] = Compute_strain_m(B,tau_eff,n)
+% For a given B, tau_eff, and n, gives the strain rate 
+% Input: B Pre-exponential factor 
+%        n stress exponent
+%        tau_eff the effective stress 
+%        if n is not one of the output parameter, default = 1.0 =>
+%        Diffusion creep
+if nargin == 2
+    n = 1.0;
+end
+eps = B*tau_eff^n;    
+end
