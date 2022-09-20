@@ -1,5 +1,6 @@
 function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum)
         % Output: 
+        %==================================================================
         % drho = density contrast
         % B_d  = diffusion creep pre-exponential factor
         % B_n  = dislocation creep pre-exponential factor
@@ -8,6 +9,7 @@ function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum)
         % Psi  = ratio between mantle effetive viscosity and slab effective
         % viscosity
         % Lambda = Combination of (l0/s)*(alpha*Psi)/2
+        %==================================================================
         % Input
         % eta0 = reference viscosity at referenc stress
         % s0   = reference stress
@@ -16,9 +18,7 @@ function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum)
         % n    = power law exponent
         % Df   = viscosity contrast between diffusion and dislocation at reference
         %        stress
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
+        %==================================================================
         drho   = 2*s0/(9.81*l0);     % delta rho 
         B_n   = s0^(1-n)/eta0;       % compliance dislocation
         B_d   = 1/(Df*eta0);         % compliance diffusion
@@ -30,8 +30,7 @@ function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum)
         alpha = 5.0;                 % Ancient parameter derived by Yanick et al. 1986
         len = l0/(2*1000e3);         % Length divided by a characteristic lenght scale (i.e. size of my model)
         Lambda = len*alpha*Psi;      % Parameter derived by 2D numerical simulation 
-        string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda','alpha','len'};
-                    
+        string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda','alpha','len'};                    
         for is = 1:numel(string_ID)
               ID.(string_ID{is}) = eval(string_ID{is});
         end

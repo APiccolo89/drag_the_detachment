@@ -27,7 +27,7 @@ function Testdata = Run_Simulation_Drag(ID)
     % Function to post process the stress, strain and so forth
     % place holder
     % save relevant data of the simulation:
-    [Testdata]=postprocess_data(t,D,ID,te,De,ie); 
+    [Testdata]=postprocess_data(t,D,ID); 
     %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
@@ -48,7 +48,48 @@ function [res] = compute_dragODE(D,dDdt,ID)
     res = -D*(eps_eff)-dDdt;
 end
 
-
+function [Testdata]=postprocess_data(t,D,ID)
+    % post process the data using the same function used to compute the raw
+    % results.
+    %======================================================================
+    % Input:
+    % t : time computed by the ODE i5 
+    % D : thickness evolution with time
+    % ID: Initial Data Structure 
+    %======================================================================
+    % Output: 
+    % Testdata : Data structure with the post process data. 
+    %======================================================================
+    % Alg: Compute dDdt using a simple diff (diff(D)/diff(t)
+    %
+    %
+    %
+    %
+    %======================================================================
+    dDdt = (D(2:1:end)-D(1:end-1))./(t(2:1:end)-t(1:1:end-1));
+    D = 0.5*(D(1:1:end-1)+D(2:1:end));
+    t   = 0.5*(t(1:1:end-1)+t(2:1:end));
+    [t_eff,t_B,t_D] = Compute_effective_StressD(D,dDdt,ID);
+    [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff); 
+    tau = [t_B,t_D,t_eff]./ID.s0;
+    eps = [eps_eff,eps_d,eps_n]./ID.ec;
+    Testdata.time   = t/ID.tc; %time vector divided by the detachment timescale 
+    Testdata.D_norm = D/ID.D0;
+    Testdata.t_det   = te/ID.tc;
+    Testdata.tau(1,:) = tau(:,1);
+    Testdata.tau(2,:) = tau(:,2);
+    Testdata.tau(3,:) = tau(:,3);
+    Testdata.eps(1,:) = eps(:,1);
+    Testdata.eps(2,:) = eps(:,2);
+    Testdata.eps(3,:) = eps(:,3);
+    % Find the max tau eff
+    t_t_max = max(Testdata.tau(3,:));
+    ind     = find(Testdata.tau(3,:)==t_t_max);
+    time_t_M = t(ind);
+    Testdata.t_t_max = t_t_max;
+    Testdata.time_t_M = time_t_M./ID.tc; 
+    Testdata.t_t_det  = Testdata.tau(3,end);
+end
 % Event detection (not difficult, though, i just copied the matlab help
 % page (which has been copied also by Marcel in his code) 
 function [position,isterminal,direction] = det_EV(t,y,yp0,ID)

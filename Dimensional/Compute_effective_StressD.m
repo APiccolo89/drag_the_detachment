@@ -24,9 +24,9 @@ function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID)
         check_Eff = 1.88E+08;
     end
     % Buoyancy stress computed tau_B = F_B/2/D; 
-    tau_B = (ID.s0*ID.D0)/D;
+    tau_B = (ID.s0*ID.D0)./D;
     % Drag force related stress compute formulation of Bercovici et al 2015 
-    tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2/D^2)*dDdt*ID.len)/2/D;
+    tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
     
     if nargin==0
         if(abs(tau_D+tau_B-check_Eff)>1e-6)
