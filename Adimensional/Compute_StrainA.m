@@ -67,5 +67,5 @@ function [eps] = Compute_strain_m(B,tau_eff,n)
 if nargin == 2
     n = 1.0;
 end
-eps = B*tau_eff^n;    
+eps = B.*tau_eff.^n;    
 end

@@ -80,8 +80,8 @@ elseif strcmp(field,'time_max-time det')
 elseif strcmp(field,'t_det_error')
     x = Data_S(1,:);
     y = Data_S(7,:);
-    ylabel('$t^D_{det}-t^A_{det} [n.d.]$','Interpreter','latex');
-    fin = 'Global_test1_error';
+    ylabel('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$','Interpreter','latex');
+    fin = 'Global_test1DS_dT';
 end
 figure(1)
 scatter(x,y,20,c,'filled','d')

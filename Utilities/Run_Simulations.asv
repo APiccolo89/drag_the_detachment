@@ -37,23 +37,19 @@ for i=1:n_tests
     Df    = iuDf(i);
     [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum);
     % Create a labeling for the simulation
-    str0   = strcat('Sim_D0_',num2str(int16(D0/1e3)));
-    str1   = strcat('em_',num2str(i));
-    str2   = strcat('s0_',num2str(j));
-    str3   = strcat('eta0_',num2str(k));
-    str4   = strcat('L0_',num2str(z));
-    str5   = strcat('Df_',num2str(d));
-    l_simulation = strcat(str0,str1,str2,str3,str4,str5);
+    str0   = strcat('Sim_D0_',num2str(int16(D0/1e3)),num2str(i));
+    l_simulation = strcat(str0);
     disp(['Simulation ',l_simulation, 'is starting'])
     % Run a simulation with a specific combination of parameter
     Testdata = Run_Simulation_Drag(ID);
     Testdata_a = Run_Simulation_DragA(ID.ID_A);
     Tests.(l_simulation) = Testdata;
+    Tests.(l_simulation).Testdata_a=Testdata_a;
     Tests.(l_simulation).initial_data = ID;
     ID = [];
     Testdata = [];
     percentages_test = (i/n_tests)*100;
-    disp([num,,'per cent completed'])
+    disp([num2str(percentages_test,2),'per cent completed'])
 end
 toc
 end

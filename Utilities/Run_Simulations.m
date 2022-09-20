@@ -42,9 +42,9 @@ for i=1:n_tests
     disp(['Simulation ',l_simulation, 'is starting'])
     % Run a simulation with a specific combination of parameter
     Testdata = Run_Simulation_Drag(ID);
-    %Testdata_a = Run_Simulation_DragA(ID.ID_A);
+    Testdata_a = Run_Simulation_DragA(ID.ID_A);
     Tests.(l_simulation) = Testdata;
-    %Tests.(l_simulation).Testdata.A=Testdata_a;
+    Tests.(l_simulation).Testdata_a=Testdata_a;
     Tests.(l_simulation).initial_data = ID;
     ID = [];
     Testdata = [];

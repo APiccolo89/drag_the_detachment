@@ -52,7 +52,7 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim)
     if Dim == 1
         Testdata.time_t_M = time_t_M./ID.tc;
     else
-        Testdata.time_t_M = time_t_M
+        Testdata.time_t_M = time_t_M;
     end
     Testdata.t_t_det  = Testdata.tau(3,end);
 end

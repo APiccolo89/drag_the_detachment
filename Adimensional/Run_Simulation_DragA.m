@@ -22,23 +22,8 @@ function TestdataA = Run_Simulation_DragA(ID_A)
     options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 10],ID_A.D0,dDdt0,options);
-    % Normalize the thickness vector
-    % Function to post process the stress, strain and so forth
-    % place holder
-    % save relevant data of the simulation:
-    
+    [TestdataA]=postprocess_data(t,D,ID_A,te,De,ie,0); 
 
-    TestdataA.time   = t; %time vector divided by the detachment timescale 
-    TestdataA.D_norm = D;
-    TestdataA.t_det   = te;
-    %TestdataA.tau(1,:) = t_B;
-    %TestdataA.tau(2,:) = t_D;
-    %TestdataA.tau(3,:) = (t_B+t_D);
-    % Find the max tau eff
-    %TestdataA.t_t_max = t_t_max;
-    %TestdataA.time_t_M = time_t_M./ID_A.tc; 
-    %TestdataA.t_t_det  = TestdataA.tau(3,end);
-    %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
 function [res] = compute_dragODEA(D,dDdt,ID_A)
@@ -56,13 +41,13 @@ function [res] = compute_dragODEA(D,dDdt,ID_A)
     
     % Compute the effective stress 
     [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A);
-    [epsilon_eff,eps_dif,eps_dis] = Compute_Effective_StrainA(ID_A,tau_eff);
+    [epsilon_eff,eps_dif,eps_dis] = Compute_StrainA(ID_A,tau_eff);
     res                           = -D*(epsilon_eff)-dDdt;
 end
 % Event detection (not difficult, though, i just copied the matlab help
 % page (which has been copied also by Marcel in his code) 
 function [position,isterminal,direction] = det_EV(t,y,yp0,ID)
-    position = y(1)-0.1*ID.D0; % The value that we want to be zero
+    position = y(1)-0.1; % The value that we want to be zero
     % To be precise, each time step y(1) is the actual thickness. so,
     % D(t)-0.1*D0 must be 0 to stop the simulation and having an event. 
     % Additional mistake that I did the function handle must incorporate the

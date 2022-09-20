@@ -10,17 +10,17 @@ addpath Utilities\
 %Parameter to test: 
 % To do: 
 % Generate a data structure and labelling. 
-l0_v    = (300e3:50e3:600e3);                 % initial length
-D0      = 80e3;                  % thickness
+l0_v    = (300e3:30e3:600e3);                 % initial length
+D0      = 80e3;                       % thickness
 % Slab Rheology
-eta0_v = [1e22,5e22,1e23,5e23];                   % [Pas] refernce power law viscosity slab 
-Df_v   = [0.8,1.0,10,100];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
-n_v     =[2.0, 3.5,7.0,9.0];                       % [n.d.] pre-exponential factor
-s0_v  = [100e6:50e6:200e6];                   % [Pa]  reference buoyancy stress
+eta0_v = [10.^(22:0.5:24)];                   % [Pas] refernce power law viscosity slab 
+Df_v   = [10.0];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+n_v     =[ 3.5];                       % [n.d.] pre-exponential factor
+s0_v  = [100e6:100e6:200e6];                   % [Pa]  reference buoyancy stress
 % Upper Mantle
-etaum_v =10.^(18:0.1:21);    % [Pa.s]vector of the mantle viscosity
+etaum_v =[1.0,10.^(18:0.1:21)];    % [Pa.s]vector of the mantle viscosity
 
-name_tests_v = {'D0_80km_n_2dot0_Df_EXT','D0_80km_n_3dot5_Df_EXT','D0_80km_n_7dot0_Df_EXT','D0_80km_n_9dot0_Df_EXT'};
+name_tests_v = {'D0_80km_n_3dot5_Df_EXT'};
 
 ptsave = 'Tests_result';
 

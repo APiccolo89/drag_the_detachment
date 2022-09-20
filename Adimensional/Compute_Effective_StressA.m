@@ -24,9 +24,9 @@ function [tau_eff,tau_B,tau_D] = Compute_Effective_StressA(D,dDdt,ID_A)
         check_drag      = -0.012;
         check_B         = 2.0; 
     end
-    tau_B = (ID_A.D0/D);
+    tau_B = (ID_A.D0./D);
     % Drag force related stress compute formulation of Bercovici et al 2015 
-    tau_D = +ID_A.Lambda*tau_B^3*dDdt;
+    tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt;
     % Effective stress
     if nargin == 0
         if abs(tau_eff-check_eff)>1e-5 || abs(tau_D-check_drag)>1e-5 || abs(tau_B-check_B)>1e-5

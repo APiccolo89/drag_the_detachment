@@ -27,7 +27,7 @@ function Testdata = Run_Simulation_Drag(ID)
     % Function to post process the stress, strain and so forth
     % place holder
     % save relevant data of the simulation:
-    [Testdata]=postprocess_data(t,D,ID,te,De,ie); 
+    [Testdata]=postprocess_data(t,D,ID,te,De,ie,1); 
     %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
