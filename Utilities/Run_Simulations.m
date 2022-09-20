@@ -29,7 +29,8 @@ function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Benchmark)
 [ium,iut0,iuet0,iuL0,iuDf]=ndgrid(etaum_v,s0_v,eta0_v,l0_v,Df_v);
 tic
 n_tests = length(ium(:));
-for i=1:n_tests
+WORK = 4; 
+for (i=1:n_tests)
     etaum = ium(i);
     s0    = iut0(i);
     eta0  = iuet0(i);
@@ -48,6 +49,7 @@ for i=1:n_tests
     Tests.(l_simulation) = Testdata;
     Tests.(l_simulation).Testdata_a=Testdata_a;
     Tests.(l_simulation).initial_data = ID;
+    Tests.(l_simulation).Interpolation = Interpolation; 
     ID = [];
     Testdata = [];
     percentages_test = (i/n_tests)*100;
@@ -67,31 +69,28 @@ function [Interpolation] = Interpolate_Data(Testdata,Testdata_a,Benchmark)
 % Output
 % Interpolation vectors
 %==========================================================================
-if Benchmark ==1 
     D_D = Testdata.D_norm;
     t_D = Testdata.time;
     D_A = Testdata_a.D_norm;
     t_A = Testdata_a.time; 
     D_Di = interp1(t_D,D_D,t_A);
     D_Ai = interp1(t_A,D_A,t_D);
-    error_DA = nanmean(D_D-D_Ai);
-    error_AD = nanmean(D_Di-D_A);
-    disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
-    disp(['Errors interpolation are: ']);
-    disp(['Dimensional interpolated to Adimensional:',num2str(error_DA,'%3e')])
-    disp(['ADimensional interpolated to dimensional:',num2str(error_AD, '%3e')])
-    disp(['Error between detected detachment times:',num2str(abs(Testdata_a.t_det-Testdata.t_det),'%3e')])
-    disp(['=================================================='])
-
-    pause(2)
+    error_DA = nanmean(abs(D_D-D_Ai));
+    error_AD = nanmean(abs(D_Di-D_A));
+    if (Benchmark==1)
+        disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
+        disp(['Errors interpolation are: ']);
+        disp(['Adimensional interpolated to dimensional:',num2str(error_DA,'%3e')])
+        disp(['Dimensional interpolated to adimensional:',num2str(error_AD, '%3e')])
+        disp(['Error between detected detachment times:',num2str(abs(Testdata_a.t_det-Testdata.t_det),'%3e')])
+        disp(['=================================================='])
+    end
     Interpolation.t_A = t_A; 
     Interpolation.t_D = t_D;
     Interpolation.D_Di = D_Di; 
     Interpolation.D_Ai = D_Ai; 
-    Interpolation.error = [error_DA,error_AD]; 
-else
-    Interpolation = []
-end
+    Interpolation.error_DA = [error_DA,nanmax(abs(D_D-D_Ai)),nanmin(abs(D_D-D_Ai))]; 
+    Interpolation.error_AD = [error_AD,nanmax(abs(D_Di-D_A)),nanmin(abs(D_Di-D_A))]; 
 end
 
 

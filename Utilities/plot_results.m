@@ -15,6 +15,7 @@ function plot_results(Tests,name,ptsave)
     % function to do scatter plot
     plot_scatter(Data_S,name,ptsave,'t_det');
     plot_scatter(Data_S,name,ptsave,'t_det_error');
+    plot_scatter(Data_S,name,ptsave,'error_gl');
     plot_scatter(Data_S,name,ptsave,'tau_ii');
     plot_scatter(Data_S,name,ptsave,'time_max-time det');
 
@@ -29,7 +30,7 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
     % number of test 
     itest = length(fn);
     % Prepare Data_S array
-    Data_S = zeros(7,itest); 
+    Data_S = zeros(10,itest); 
     i = 1;
     for k = 1:numel(fn) 
        
@@ -40,7 +41,10 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
        Data_S(4,i) = TD.t_t_max;
        Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
        Data_S(6,i) = TD.t_t_det;
-       Data_S(7,i) = TD.t_det-TD.Testdata_a.t_det; 
+       Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det); 
+       Data_S(8,i) = TD.Interpolation.error_DA(1);
+       Data_S(9,i) = TD.Interpolation.error_DA(2);
+       Data_S(10,i) = TD.Interpolation.error_DA(3);
        i = i+1;
     end
 
@@ -82,6 +86,14 @@ elseif strcmp(field,'t_det_error')
     y = Data_S(7,:);
     ylabel('$t^D_{det}-t^A_{det} [n.d.]$','Interpreter','latex');
     fin = 'Global_test1_error';
+
+
+elseif strcmp(field,'error_gl')
+    x = Data_S(1,:);
+    y = Data_S(8,:);
+    y_err = Data_S(9,:)-Data_S(10,:);
+    ylabel('$error mean,min,max$','Interpreter','latex');
+    fin = 'Global_test1_error_GL';
 end
 figure(1)
 scatter(x,y,20,c,'filled','d')
@@ -89,6 +101,8 @@ hold on
 
 if double >0 
     scatter(x,y2,5,c,'filled','o')
+%elseif strcmp(field,'error_gl')
+ %   errorbar(x,y,y_err,'|r');
 end
 
 try

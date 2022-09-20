@@ -42,7 +42,6 @@ function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark)
             disp(['Bouyancy stress is ',num2str(res_DimB,'%10.5e')])
             disp(['Drag force is ',num2str(res_DimD,'%10.5e')])
             disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
-            pause(3)
         end
         
         if (abs(res_DimB)>1e-6 || abs(res_DimD)>1e-6)

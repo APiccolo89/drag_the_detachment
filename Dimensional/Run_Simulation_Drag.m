@@ -20,7 +20,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     % Create function handle 
     Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,0);
     % Set the option for resolving the system of equation
-    options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
+    options = odeset('RelTol',1e-5,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 10*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
@@ -45,7 +45,10 @@ function [res] = compute_dragODE(D,dDdt,ID,Benchmark)
     % Compute the effective stress 
     [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark);
     [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff,Benchmark);
-    res = -D*(eps_eff)-dDdt;
+    D_ = D/ID.D0;
+    eps_ = eps_eff/ID.ec;
+    dDdt_ = dDdt/(ID.D0/ID.tc);
+    res = -D_*(eps_)-dDdt_;
 end
 
 
