@@ -1,4 +1,4 @@
-function [eps_eff,eps_dif,eps_dis] = Compute_StrainA(ID,tau_eff)
+function [eps_eff,eps_dif,eps_dis] = Compute_StrainA(ID,tau_eff,Benchmark)
 % Input: 
 %==========================================================================
 % ID, data structure with all the initial data, both

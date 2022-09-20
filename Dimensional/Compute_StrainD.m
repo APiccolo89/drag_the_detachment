@@ -1,4 +1,4 @@
-function [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff)
+function [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff,Benchmark)
 % Input: 
 %==========================================================================
 % ID, data structure with all the initial data, both
@@ -22,6 +22,7 @@ if nargin == 0 % Unit test
     n   = 3.5;
     check_eff = 5.50E-14;
     tau_eff = 100e6;
+    Benchmark = 0; 
 else
     B_n = ID.B_n;
     B_d = ID.B_d;
@@ -37,6 +38,8 @@ eps_dif = Compute_strain_m(B_d,tau_eff);
 % Compute peirls creep 
 %place holderai
 
+
+
 if nargin == 0 
     if abs(eps_dif+eps_dis-check_eff)>1e-5
         error('Something wrong with Compute_StrainA')
@@ -47,6 +50,37 @@ if nargin == 0
 end
 % Compute the effective strain 
 eps_eff = eps_dif+eps_dis; 
+
+%Benchmark 
+% Small function that call the adimensional computation of strain rate and
+% uses the data coming from the computation of tau_eff and compare with
+% actual data
+
+if  Benchmark == 1
+
+    [A,B,C]=Compute_StrainA(ID.ID_A,tau_eff./ID.s0); 
+    res_DimB = sum(eps_eff./ID.ec-A);
+    res_Dimn = sum(eps_dis/ID.ec-C);
+    res_Dimd = sum(eps_dif/ID.ec-B);
+    if length(A)>1
+        disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
+        disp(['Dimensional-Adimensional computation of effective strain has an error of:'])
+        disp(['effective strain is ',num2str(res_DimB,'%10.5e')])
+        disp(['dislocation creep  is ',num2str(res_Dimn,'%10.5e')])
+        disp(['diffusion creep  is ',num2str(res_Dimd,'%10.5e')])
+        disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
+
+    end
+    if (abs(res_DimB)>1e-6 )
+      error('Error between the computations is unsustainable')
+    end
+
+
+end
+
+
+
+
 end
 
 function [eps] = Compute_strain_m(B,tau_eff,n)

@@ -1,7 +1,7 @@
 %========================================================================%
 % Function utilities                                                     %
 %========================================================================%
-function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v)
+function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Benchmark)
 %=====================================================================
 % Output:
 % ====================================================================
@@ -41,8 +41,10 @@ for i=1:n_tests
     l_simulation = strcat(str0);
     disp(['Simulation ',l_simulation, 'is starting'])
     % Run a simulation with a specific combination of parameter
-    Testdata = Run_Simulation_Drag(ID);
+    Testdata = Run_Simulation_Drag(ID,Benchmark);
     Testdata_a = Run_Simulation_DragA(ID.ID_A);
+    %interpolation routine from AD->D
+    [Interpolation] = Interpolate_Data(Testdata,Testdata_a,Benchmark);
     Tests.(l_simulation) = Testdata;
     Tests.(l_simulation).Testdata_a=Testdata_a;
     Tests.(l_simulation).initial_data = ID;
@@ -53,5 +55,44 @@ for i=1:n_tests
 end
 toc
 end
+
+
+function [Interpolation] = Interpolate_Data(Testdata,Testdata_a,Benchmark)
+% 
+% Input 
+%==========================================================================
+% Testdata = Dimensional results 
+% Testdata_a = Dimensional results
+%==========================================================================
+% Output
+% Interpolation vectors
+%==========================================================================
+if Benchmark ==1 
+    D_D = Testdata.D_norm;
+    t_D = Testdata.time;
+    D_A = Testdata_a.D_norm;
+    t_A = Testdata_a.time; 
+    D_Di = interp1(t_D,D_D,t_A);
+    D_Ai = interp1(t_A,D_A,t_D);
+    error_DA = nanmean(D_D-D_Ai);
+    error_AD = nanmean(D_Di-D_A);
+    disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
+    disp(['Errors interpolation are: ']);
+    disp(['Dimensional interpolated to Adimensional:',num2str(error_DA,'%3e')])
+    disp(['ADimensional interpolated to dimensional:',num2str(error_AD, '%3e')])
+    disp(['Error between detected detachment times:',num2str(abs(Testdata_a.t_det-Testdata.t_det),'%3e')])
+    disp(['=================================================='])
+
+    pause(2)
+    Interpolation.t_A = t_A; 
+    Interpolation.t_D = t_D;
+    Interpolation.D_Di = D_Di; 
+    Interpolation.D_Ai = D_Ai; 
+    Interpolation.error = [error_DA,error_AD]; 
+else
+    Interpolation = []
+end
+end
+
 
 

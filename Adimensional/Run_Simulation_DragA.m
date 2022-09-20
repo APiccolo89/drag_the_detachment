@@ -14,6 +14,8 @@ function TestdataA = Run_Simulation_DragA(ID_A)
     % => use and do plot
     % =>save the associated vector in a structure and compute the next solution
     %======================================================================
+    % 
+    Benchmark = 0 ;
     % 1) Assuming that drag force is not active
     dDdt0 = -ID_A.dDdtB;
     % Create function handle 
@@ -22,7 +24,7 @@ function TestdataA = Run_Simulation_DragA(ID_A)
     options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 10],ID_A.D0,dDdt0,options);
-    [TestdataA]=postprocess_data(t,D,ID_A,te,De,ie,0); 
+    [TestdataA]=postprocess_data(t,D,ID_A,te,De,ie,0,Benchmark); 
 
 end
 

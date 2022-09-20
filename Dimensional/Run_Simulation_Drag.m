@@ -1,4 +1,4 @@
-function Testdata = Run_Simulation_Drag(ID)
+function Testdata = Run_Simulation_Drag(ID,Benchmark)
     %Compute the D,t of the slab detachment. 
     % Output Parameter: 
     % Testdata => structure containing all the solution output that are then
@@ -18,20 +18,20 @@ function Testdata = Run_Simulation_Drag(ID)
     % 1) Assuming that drag force is not active
     dDdt0 = -(ID.tc)^(-1)*ID.D0;
     % Create function handle 
-    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID);
+    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,0);
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 1000*ID.tc],ID.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 10*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
     % Function to post process the stress, strain and so forth
     % place holder
     % save relevant data of the simulation:
-    [Testdata]=postprocess_data(t,D,ID,te,De,ie,1); 
+    [Testdata]=postprocess_data(t,D,ID,te,De,ie,1,Benchmark); 
     %disp(['time of detachment is t/tc  ',num2str(te/ID.tc,4),' which is td_O/td_P ', num2str((ID.n*te)/ID.tc,4), '  w.r.t. analytical prediction'])
 end
 
-function [res] = compute_dragODE(D,dDdt,ID)
+function [res] = compute_dragODE(D,dDdt,ID,Benchmark)
     % Output: 
     % res => Residuum of non linear equation 
     % Input : 
@@ -43,8 +43,8 @@ function [res] = compute_dragODE(D,dDdt,ID)
     % and cast the problem of necking in term of optimization. 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Compute the effective stress 
-    [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID);
-    [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff);
+    [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark);
+    [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff,Benchmark);
     res = -D*(eps_eff)-dDdt;
 end
 

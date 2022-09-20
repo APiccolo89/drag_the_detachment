@@ -1,4 +1,4 @@
-function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim)
+function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
     % =====================================================================
     % post process the data using the same function used to compute the raw
     % results. 
@@ -23,8 +23,8 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim)
     D = 0.5*(D(1:1:end-1)+D(2:1:end));
     t   = 0.5*(t(1:1:end-1)+t(2:1:end));
     if Dim == 1
-        [t_eff,t_B,t_D] = Compute_effective_StressD(D,dDdt,ID);
-        [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff); 
+        [t_eff,t_B,t_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark);
+        [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff,Benchmark); 
         tau = [t_B,t_D,t_eff]./ID.s0;
         eps = [eps_eff,eps_d,eps_n]./ID.ec;
         Testdata.time   = t/ID.tc; %time vector divided by the detachment timescale 

@@ -1,4 +1,4 @@
-function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID)
+function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark)
     % Compute effective stress
     % Input data: 
     % D => Actual thickness 
@@ -22,12 +22,38 @@ function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID)
         check_D  = -1.20E+07;
         check_B  = 2.00E+08;
         check_Eff = 1.88E+08;
+        Benchmark = 0; 
     end
     % Buoyancy stress computed tau_B = F_B/2/D; 
     tau_B = (ID.s0*ID.D0)./D;
     % Drag force related stress compute formulation of Bercovici et al 2015 
     tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
+    % benchmark: 
     
+    if  Benchmark == 1 
+        
+        [t_effA,t_BA,t_DA]=Compute_Effective_StressA(D/ID.D0,dDdt/(ID.D0/ID.tc),ID.ID_A); 
+        res_DimB = sum(tau_B./ID.s0-t_BA);
+        res_DimD = sum(tau_D./ID.s0-t_DA);
+
+        if length(t_BA)>1
+            disp(['=================================================='])
+            disp(['Dimensional-Adimensional computation of effective stress has an error of:'])
+            disp(['Bouyancy stress is ',num2str(res_DimB,'%10.5e')])
+            disp(['Drag force is ',num2str(res_DimD,'%10.5e')])
+            disp([':::::::::::::::::::::::::::::::::::::::::::::::::::'])
+            pause(3)
+        end
+        
+        if (abs(res_DimB)>1e-6 || abs(res_DimD)>1e-6)
+            error('Error between the computations is unsustainable')
+        end
+
+    end
+
+
+   
+
     if nargin==0
         if(abs(tau_D+tau_B-check_Eff)>1e-6)
             error('There is a problem with Compute Effective Stress D')
