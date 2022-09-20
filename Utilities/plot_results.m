@@ -57,6 +57,9 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
     tic
     plot1D_setExp(Tests,Data_S,name,'tau_D_tau_B',ptsave)
     toc
+    tic
+    plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave)
+    toc
 end
 
 function plot_scatter(Data_S,name,ptsave,field) 
@@ -84,7 +87,7 @@ elseif strcmp(field,'time_max-time det')
 elseif strcmp(field,'t_det_error')
     x = Data_S(1,:);
     y = Data_S(7,:);
-    ylabel('$t^D_{det}-t^A_{det} [n.d.]$','Interpreter','latex');
+    ylabel('t^D_{det}-t^A_{det} [n.d.]');
     fin = 'Global_test1_error';
 
 
@@ -92,7 +95,7 @@ elseif strcmp(field,'error_gl')
     x = Data_S(1,:);
     y = Data_S(8,:);
     y_err = Data_S(9,:)-Data_S(10,:);
-    ylabel('$error mean,min,max$','Interpreter','latex');
+    ylabel('mean(D_A(t)-D_D(t), mean error dimension D, adimensional D ','Interpreter','latex');
     fin = 'Global_test1_error_GL';
 end
 figure(1)
@@ -140,7 +143,7 @@ close;
 
 end 
 function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
-
+    figure(1)
     % Collect the field names 
     fn = fieldnames(Tests);
     % Set the min and max of lambda value for the coloring of the plot
@@ -155,8 +158,10 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
         VAL = 0;
     elseif strcmp(field,'tau_eff')
         VAL=1; 
+    elseif strcmp(field,'epsilon')
+        VAL = 2.0
     else 
-        VAL = 2; 
+        VAL = 3.0; 
     end
 
     try
@@ -166,8 +171,8 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     end
     % Set colorbar
     % Set colorbar
-c=colorbar;
-c.Label.String = 'log10(\Lambda) [n.d.]';
+    c=colorbar;
+    c.Label.String = 'log10(\Lambda) [n.d.]';
     % Define coloraxis
     caxis([z_min z_max])
     % min/max are rounded using the log values of Lambda
@@ -192,9 +197,14 @@ c.Label.String = 'log10(\Lambda) [n.d.]';
        elseif VAL == 1
            buf = TD.tau(3,:);
            ylabel('$\frac{\tau_{eff}}{\tau_{B,0}} [n.d.]$','interpreter','latex')
+       elseif VAL==2 
+           buf = TD.eps(1,:);
+           ylabel('$\frac{\dot{\varepsilon}_{II}}{\dot{\varepsilon}_{B,0}} [n.d.]$','interpreter','latex')
+           set(gca, 'YScale', 'log')
        else
            buf = log10(-TD.tau(2,:)./TD.tau(1,:));
            ylabel('$\frac{\tau_{D}}{\tau_{B}} [n.d.]$','interpreter','latex')
+           set(gca, 'YScale', 'log')
        end
 
        % Normalize Lambda value w.r.t. the limit that I assumed to be
@@ -210,7 +220,7 @@ c.Label.String = 'log10(\Lambda) [n.d.]';
        hold on 
        plot(TD.time*TD.initial_data.n,buf,'Color',C)
        grid on 
-       xlim([0,20])
+       xlim([0,10])
        xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
        i = i+1; 
     end
