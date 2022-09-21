@@ -104,8 +104,11 @@ hold on
 
 if double >0 
     scatter(x,y2,5,c,'filled','o','MarkerEdgeColor','k','LineWidth',0.5)
-    legend({'$max(\frac{\tau_{II}}{\tau_{B,0}})$','$\frac{\tau^{Det}_{II}}{\tau_{B,0}}$'},'Interpreter','latex');
- end
+    hl=legend('$max(\frac{\tau_{II}}{\tau_{B,0})$','\frac{\tau_{II,det}}{\tau_{B,0}','interpreter','latex');
+    set(hl, 'Interpreter','latex')
+%elseif strcmp(field,'error_gl')
+ %   errorbar(x,y,y_err,'|r');
+end
 
 try
     cmap = colormap(crameri('berlin'));

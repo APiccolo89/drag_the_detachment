@@ -29,6 +29,8 @@ function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Benchmark)
 [ium,iut0,iuet0,iuL0,iuDf]=ndgrid(etaum_v,s0_v,eta0_v,l0_v,Df_v);
 tic
 n_tests = length(ium(:));
+disp(['Number of tests is ',num2str(n_tests)])
+pause(5)
 WORK = 4; 
 for (i=1:n_tests)
     etaum = ium(i);
