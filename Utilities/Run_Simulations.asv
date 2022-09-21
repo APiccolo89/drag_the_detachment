@@ -44,7 +44,7 @@ end
 
 pause(5)
 WORK = 1; 
-for i=1:n_tests
+parfor (i=1:n_tests,WORK)
     
     etaum = ium(i);
     s0    = iut0(i);
@@ -57,7 +57,6 @@ for i=1:n_tests
     disp([num2str(percentages_test,2),'per cent completed'])
 end
 toc
-bla=1.0;
 end
 
 

@@ -12,7 +12,7 @@ Benchmark = 1.0 ; % Benchmark activaction flag
 % To do: 
 % Generate a data structure and labelling. 
 l0_v    = (300e3:100e3:600e3);                 % initial length
-D0      = 100e3;                       % thickness
+D0      = 80e3;                       % thickness
 % Slab Rheology
 eta0_v = [10.^(22:1:23)];                   % [Pas] refernce power law viscosity slab 
 Df_v   = [10.0];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
