@@ -40,9 +40,8 @@ function [res] = compute_dragODEA(D,dDdt,ID_A)
     % terms of residuum. This function is the right form to use with ODE15.
     % and cast the problem of necking in term of optimization. 
     %======================================================================
-    
     % Compute the effective stress 
-    [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A);
+    [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A,0);
     [epsilon_eff,eps_dif,eps_dis] = Compute_StrainA(ID_A,tau_eff);
     res                           = -D*(epsilon_eff)-dDdt;
 end

@@ -1,4 +1,4 @@
-function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark)
+function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um)
     % Compute effective stress
     % Input data: 
     % D => Actual thickness 
@@ -29,16 +29,16 @@ function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark)
     % Drag force related stress compute formulation of Bercovici et al 2015 
     % Compute the effective stress and effective viscosity 
     
-    if isnan(ID.Bnum) || ~ID.Bnum 
+    if isnan(ID.Df_UM) || ~ID.Df_UM 
         tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
     else
-        [tau_D,eta_um] = compute_drag_stress(ID,D,dDdt); 
+        [tau_D,eta_um,ID] = compute_drag_stress(ID,D,dDdt); 
     end
     % benchmark: 
     
     if  Benchmark == 1 
         
-        [t_effA,t_BA,t_DA]=Compute_Effective_StressA(D/ID.D0,dDdt/(ID.D0/ID.tc),ID.ID_A); 
+        [t_effA,t_BA,t_DA]=Compute_Effective_StressA(D/ID.D0,dDdt/(ID.D0/ID.tc),ID.ID_A,0.0); 
         res_DimB = sum(tau_B./ID.s0-t_BA);
         res_DimD = sum(tau_D./ID.s0-t_DA);
 
@@ -69,5 +69,17 @@ function [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark)
     
     % Effective stress
     tau_eff = tau_B+tau_D;
+ if non_linear_um == 1 
+        varargout{1} = tau_eff;
+        varargout{2} = tau_B; 
+        varargout{3} = tau_D; 
+        varargout{4} = ID; 
+        varargout{5} = eta_um; 
+    else
+        varargout{1} = tau_eff;
+        varargout{2} = tau_B; 
+        varargout{3} = tau_D; 
+        varargout{4} = ID; 
 
+ end
 end

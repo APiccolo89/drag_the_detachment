@@ -24,8 +24,6 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
         check_drag      = -0.012;
         check_B         = 2.0; 
     end
-   
-
     tau_B = (ID_A.D0./D);
     % Drag force related stress compute formulation of Bercovici et al 2015 
 

@@ -1,7 +1,7 @@
 %========================================================================%
 % Function utilities                                                     %
 %========================================================================%
-function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Benchmark)
+function [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Df_UM,Benchmark)
 %=====================================================================
 % Output:
 % ====================================================================
@@ -51,7 +51,7 @@ for i=1:n_tests
     eta0  = iuet0(i);
     l0    = iuL0(i);
     Df    = iuDf(i);
-    [Temp]=Processing_simulation(eta0,Df,n,l0,s0,D0,etaum,Benchmark,fields_structure{i});
+    [Temp]=Processing_simulation(eta0,Df,n,l0,s0,D0,etaum,Benchmark,Df_UM,fields_structure{i});
     Tests.(fields_structure{i})=Temp;
     percentages_test = (i/n_tests)*100;
     disp([num2str(percentages_test,2),'per cent completed'])
@@ -94,9 +94,9 @@ function [Interpolation] = Interpolate_Data(Testdata,Testdata_a,Benchmark)
     Interpolation.error_DA = [error_DA,nanmax(abs(D_D-D_Ai)),nanmin(abs(D_D-D_Ai))]; 
     Interpolation.error_AD = [error_AD,nanmax(abs(D_Di-D_A)),nanmin(abs(D_Di-D_A))]; 
 end
-function [Temp]=Processing_simulation(eta0,Df,n,l0,s0,D0,etaum,Benchmark,l_simulation)
+function [Temp]=Processing_simulation(eta0,Df,n,l0,s0,D0,etaum,Benchmark,Df_UM,l_simulation)
 
-    [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum);
+    [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum,Df_UM);
     % Run a simulation with a specific combination of parameter
     Testdata = Run_Simulation_Drag(ID,Benchmark);
     Testdata_a = Run_Simulation_DragA(ID.ID_A);

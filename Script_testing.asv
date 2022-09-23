@@ -6,7 +6,7 @@ clf
 addpath Adimensional\
 addpath Dimensional\
 addpath Utilities\
-Benchmark = 0.0 ; % Benchmark activaction flag
+Benchmark = 1.0 ; % Benchmark activaction flag
 %==========================================================================
 %Parameter to test: 
 % To do: 
@@ -33,7 +33,7 @@ for i=1:4
     name_tests = name_tests_v{i};
     n = n_v(i);
     % Function to run the ensamble of test 
-    [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,Df_UM,Benchmark);
+    [Tests] = Run_Simulations(D0,l0_v,eta0_v,Df_v,n,s0_v,etaum_v,,Benchmark);
     plot_results(Tests,name_tests,ptsave)
 end
 

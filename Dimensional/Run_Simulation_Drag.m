@@ -22,7 +22,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-5,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 100*ID.tc],ID.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 10*ID.tc],ID.D0,dDdt0,options);
     % Normalize the thickness vector
     % Function to post process the stress, strain and so forth
     % place holder
@@ -43,7 +43,7 @@ function [res] = compute_dragODE(D,dDdt,ID,Benchmark)
     % and cast the problem of necking in term of optimization. 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Compute the effective stress 
-    [tau_eff,tau_B,tau_D] = Compute_effective_StressD(D,dDdt,ID,Benchmark);
+    [tau_eff,tau_B,tau_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,0);
     [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff,Benchmark);
     D_ = D/ID.D0;
     eps_ = eps_eff/ID.ec;
