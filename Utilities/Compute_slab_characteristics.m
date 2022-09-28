@@ -28,9 +28,10 @@ function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum,Df_UM)
         Psi      = etaum/etaS_eff;    % ratio between the upper mantle viscosity and the slab viscosity
         % Alpha 
         alpha = 5.0;                 % Ancient parameter derived by Yanick et al. 1986
+        s     = 1000e3;
         len = l0/(2*1000e3);         % Length divided by a characteristic lenght scale (i.e. size of my model)
         Lambda = len*alpha*Psi;      % Parameter derived by 2D numerical simulation 
-        string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda','alpha','len','Df_UM'};                    
+        string_ID = {'B_d','B_n','s0','n','eta0','Df','drho','D0','l0','etaum','tc','ec','Psi','Lambda','alpha','len','Df_UM','s'};                    
         for is = 1:numel(string_ID)
               ID.(string_ID{is}) = eval(string_ID{is});
         end
