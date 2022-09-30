@@ -17,9 +17,9 @@ D0      = 80e3;                       % thickness
 eta0_v = [10.^(22:1:23)];                   % [Pas] refernce power law viscosity slab 
 Df_v   = [10.0];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
 n_v     =[ 3.5];                       % [n.d.] pre-exponential factor
-s0_v  = [50e6:50e6:300e6];                   % [Pa]  reference buoyancy stress
+s0_v  = [100e6:50e6:200e6];                   % [Pa]  reference buoyancy stress
 % Upper Mantle
-etaum_v =[10.^(18:1:21)];    % [Pa.s]vector of the mantle viscosity
+etaum_v =[10.^(22)];    % [Pa.s]vector of the mantle viscosity
 Df_UM   = 100; 
 name_tests_v = {'D0_80km_n_3dot5_Df_EXT','D0_80km_n_2dot0_Df_EXT','D0_80km_n_7dot0_Df_EXT','D0_80km_n_9dot0_Df_EXT'};
 

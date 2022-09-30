@@ -20,60 +20,92 @@ function [tau_D,etaum,ID] = compute_drag_stress(ID,D,dDdt)
 %
 %
 %==========================================================================
+if nargin == 0
+    [ID_] = Compute_slab_characteristics();
+    ID = ID_;  
+    D = ID.D0;
+    dDdt = -D*(ID.ec);
+end
+
+
+
 if length(dDdt)>1
     n_points = length(dDdt);
     etaum = zeros(n_points,1);
     tau_D = zeros(n_points,1);
     for i=1:n_points
-    if i == 1 
-        eta_um_ = ID.etaum; 
-    else
-        eta_um_ = etaum(i-1); 
-    end
-    [etaum(i), tau_D(i),ID] =  compute_iteration(ID,dDdt(i),D(i),eta_um_); 
+    [etaum(i), tau_D(i)] =  compute_drag_stress_etaD(ID,dDdt(i),D(i)); 
     end
 else
 
- [etaum, tau_D,ID] =  compute_iteration(ID,dDdt,D,ID.eta_um_); 
+ [etaum, tau_D] =  compute_drag_stress_etaD(ID,dDdt,D); 
 
+ if nargin == 0 
+    [tau_D,Lambda] = compute_drag_stressA(ID,D,dDdt); 
+    tau_D_D_ = tau_D_D/DIM.s0;
+    res_stress = tau_D_D_-tau_D; 
+    % compute Lambda: 
+    Lambda_D   = DIM.Lambda/(1+(DIM.Df_UM)*(abs(tau_D_D/DIM.s0))^(DIM.n-1));
+    res_lambda = Lambda_D-Lambda; 
+    disp('  Residuum between computed by adimensional and dimensional is: ')
+    disp(['     tau_D(D)-tau_D(A) = ', num2str(res_stress,3)])
+    disp(['     Lambda(D)-Lambda(A) = ', num2str(res_lambda,3)])
+    disp(['===================================================================='])
 
 end
 
 end
 
+end
 
-function [eta_um,tau_D,ID] = compute_iteration(ID,dDdt,D,eta_um_)
 
-    s = ID.s;               % size of the convection cell 
-    alpha = ID.alpha;       % alpha 
-    B_n_um  =     
+function [eta_um,tau_D] = compute_drag_stress_etaD(ID,dDdt,D)
+%=====================================================================%
+% Input: ID   : structure containing the initial data (to improve)    %
+%        dDdt : the converged dDdt                                    %
+%        D    : actual thickness                                      %
+%======================================================================
+% Output: eta_um : viscosity of the upper mantle                      %
+%         tau_d_ : the drag stress.                                   %
+%======================================================================
+% Alg : a) Compute guess stress using dDdt.                           %
+%       b) Compute new stress and then viscosity with fzero           %
+%       c) Output viscosity and tau_D                                 %
+%======================================================================
+%Lengthy explanation: Initially I tried to compute the guess using the
+%stress. In reality I was complicating my life. I could have used the
+%effective strain rate (vz/s) provided by the formulation of Bercovici.
+%I compute the dislocation creep guess using the initial strain rate.
+%then I compute the effective viscosity and compute a lambda guess.
+%After that, I compute Lambda using a stress based definition, which is
+%more safe (eps_tot = eps_dif+eps_dis) while tau is the same for all
+%the mechanism and to be consistent with my derivation.
+%======================================================================
+% Prepare the initial value
+% compute the initial strain rate
 
-    epsilon_tot = abs(alpha*(ID.D0^2./D.^2).*dDdt.*1/s);
-    eta_n_ = 0.5*(1/(ID.B_n^(1/ID.n)*epsilon_tot^((ID.n-1)/ID.n))); 
-    eta_d_ = ID.etaum; 
-    eta_um = (1/eta_n_+1/eta_d_)^(-1);
+eps_A = abs(ID.alpha*(ID.D0^2./D.^2).*dDdt.*1/ID.s);
+eta_n = (2*ID.B_n_um^(1/ID.n)*eps_A^((ID.n-1)/ID.n))^(-1);
+eta_eff_g =(1/ID.etaum+1/eta_n)^-1;
+%options = optimset('PlotFcns',{@optimplotx,@optimplotfval});
+tau_g    = (2*eta_eff_g*eps_A);                               %Here there is a mistake, perhaps correct intuition, but i need a way to find out 
+fun      = @(x) f_zero_L_TD(x,dDdt,D,ID,eps_A);
+tau_D    = fzero(fun,abs(tau_g));
+eta_um   = ID.etaum/(1+ID.Df_UM*(abs(tau_D)/ID.s0)^(ID.n-1));
+tau_D    = tau_D*sign(dDdt); 
+end
 
-    tau_D  = abs(2*eta_um*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
-%     lim = 1e-6;
-%     res = 1.0;
-%     it = 0;
-%     loop = 1; 
-%     while loop == 1
-%         eta_um_0 = (ID.etaum)./(1+ID.Df_UM*(abs(tau_D_./ID.s0)^(ID.n-1)));
-%         tau_D_0  = abs(2*eta_um_0*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
-%         res = abs(tau_D_0-tau_D_);
-%         if eta_um_0 < 1e13
-%             error('C')
-%         end
-%         tau_D_=tau_D_0;
-%         it = it+1; 
-%         if res < lim || it > 100
-%              loop = 0; 
-%         end
-%       
-%     end
-%     etaum = eta_um_0;
-%     ID.eta_um_ = etaum; 
-%     tau_D = tau_D_0*sign(dDdt);
 
-    end
+
+function [res] = f_zero_L_TD(tau_D,dDdt,D,ID,eps_A)
+%====================================================================%
+% Cast the problem of finding the root as optimization parameter
+% use fzero and retrieve the real stress
+% use the real stress to compute the new etaum.
+%====================================================================%
+eps = ID.B_n_um*(abs(tau_D)^ID.n)*(1+(1/ID.Df_UM)*(abs(tau_D)/ID.s0)^(1-ID.n));
+%eta_n = (2*ID.B_n_um*abs(tau_D)^((ID.n-1)))^(-1);
+%eta_eff_g =(1/ID.etaum+1/eta_n)^-1;
+res = eps-eps_A;   
+% (eps_A-(1/(2*ID.etaum)*abs(tau_D)+ID.B_n_um*abs(tau_D)^(ID.n)));
+end
