@@ -1,4 +1,4 @@
-function TestdataA = Run_Simulation_DragA(ID_A)
+function Testdata = Run_Simulation_DragA(ID_A)
     %Compute the D,t of the slab detachment.
     %======================================================================
     % Output Parameter: 
@@ -16,15 +16,29 @@ function TestdataA = Run_Simulation_DragA(ID_A)
     %======================================================================
     % 
     Benchmark = 0 ;
+    if(nargin==0)
+       % Benchmark = 1;  
+        ID_ = Compute_slab_characteristics();
+        ID_A  = ID_.ID_A;
+    end
+    
     % 1) Assuming that drag force is not active
     dDdt0 = -ID_A.dDdtB;
     % Create function handle 
     Funf_wi = @(t,x,xp0) compute_dragODEA(x,xp0,ID_A);
     % Set the option for resolving the system of equation
-    options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
+    options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 10],ID_A.D0,dDdt0,options);
-    [TestdataA]=postprocess_data(t,D,ID_A,te,De,ie,0,Benchmark); 
+    [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,1.0); 
+    if nargin == 0 
+    % run the twin test adimensional and check the residuum between the two
+    % functions. {Is giving allmost the same results?)
+    Testdata_D = Run_Simulation_Drag(ID_,1.0);
+    % Interpolate the results and plot them: 
+    [Intp_data]=Interpolation_routinesAD(Testdata_D,Testdata,Benchmark);
+    plot_benchmark(Intp_data,ID_,Testdata.D_norm,0.0)
+    end
 
 end
 

@@ -47,6 +47,7 @@ else
     Lambda_A   = ID.Lambda/(1+(ID.Df_UM)*(abs(tau_D_))^(ID.n-1));
     Lambda_D   = (etaum/((1/ID.eta0+1/(ID.Df*ID.eta0))^(-1)))*((ID.l0*ID.alpha)/(2*ID.s));
     res_lambda = Lambda_A-Lambda_D; 
+    disp(['===================================================================='])
     disp('  Residuum between computed by dimensional and adimensional is: ')
     disp(['     tau_D(A)-tau_D(D) = ', num2str(res_stress,3)])
     disp(['     Lambda(A)-Lambda(D) = ', num2str(res_lambda,3)])

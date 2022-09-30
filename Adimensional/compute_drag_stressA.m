@@ -37,12 +37,13 @@ else
     [Lambda, tau_D] =  compute_drag_stress_etaA(ID,dDdt,D);
 
 if nargin == 0 
-    [tau_D_D, eta_um,DIM] = compute_drag_stress(); 
-    tau_D_D_ = tau_D_D/DIM.s0;
+    [tau_D_D, eta_um] = compute_drag_stress(ID_,D*ID_.D0,dDdt*ID_.D0/ID_.tc); 
+    tau_D_D_ = tau_D_D/ID_.s0;
     res_stress = tau_D_D_-tau_D; 
     % compute Lambda: 
-    Lambda_D   = DIM.Lambda/(1+(DIM.Df_UM)*(abs(tau_D_D/DIM.s0))^(DIM.n-1));
-    res_lambda = Lambda_D-Lambda; 
+    Lambda_D   = ID_.Lambda/(1+(ID_.Df_UM)*(abs(tau_D_D/ID_.s0))^(ID_.n-1));
+    res_lambda = Lambda_D-Lambda;
+    disp(['===================================================================='])
     disp('  Residuum between computed by adimensional and dimensional is: ')
     disp(['     tau_D(D)-tau_D(A) = ', num2str(res_stress,3)])
     disp(['     Lambda(D)-Lambda(A) = ', num2str(res_lambda,3)])
