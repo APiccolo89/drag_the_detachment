@@ -32,7 +32,9 @@ function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um
     if isnan(ID.Df_UM) || ~ID.Df_UM 
         tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
     else
-        [tau_D,eta_um,ID] = compute_drag_stress(ID,D,dDdt); 
+        [tau_M,eta_um,ID] = compute_drag_stress(ID,D,dDdt); 
+        tau_D = (2.*eta_um.*ID.alpha.*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
+
     end
     % benchmark: 
     

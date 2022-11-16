@@ -7,7 +7,7 @@ function  plot_benchmark(Intp,ID,D,Dim)
     pt2=fullfile(pt0,'Benchmark_A_D_diff.png');
 
     labels={'Dimensional','Adimensional','Analytical'};
-    name = strcat("Benchmark, $\Lambda = $",num2str(log10(ID.Lambda),3), ' [n.d.], Adimensional to Dimensional');
+    name = strcat("$log_{10}(\Lambda) = $",num2str(log10(ID.Lambda),3));
     
 
     else
@@ -40,8 +40,11 @@ function  plot_benchmark(Intp,ID,D,Dim)
     %grid minor
     xlabel('$\frac{t}{t_d} [n.d.]$',Interpreter='latex')
     ylabel('$\frac{D}{D_0} [n.d.]$',Interpreter='latex')
+    xlim([0,10])
+    ylim([0.1,1.0])
     title(name,Interpreter="latex")
-
+    set(gca,'TickLabelInterpreter','latex')
+    set(gca,'Color','none')
     print(pt,'-dpng')
     clf; 
     close;
@@ -61,7 +64,8 @@ function  plot_benchmark(Intp,ID,D,Dim)
     xlabel('$\frac{t}{t_c} [n.d.]$',Interpreter='latex')
     set(gca, 'YScale', 'log')
     title(name,Interpreter="latex")
-
+    set(gca,'TickLabelInterpreter','latex')
+    set(gca,'Color','none')
     print(pt2,'-dpng')
     clf; 
     close;

@@ -1,5 +1,11 @@
-function [tau_D,etaum,ID] = compute_drag_stress(ID,D,dDdt)
+function [tau_M,etaum,ID] = compute_drag_stress(ID,D,dDdt)
 %Input:
+% UPDATE: I'm Idiot and I was confusiong the drag stress that i compute
+% here for the one that actually is computed for the slab. 
+% I.e. IN THIS FUNCTION I ESTIMATE THE AVERAGE VISCOSITY WITHIN A COUETTE
+% LIKE FLOW WHOSE DIMENSION IS THE LENGHT OF THE SLAB!!!!! AND I NEED TO DO
+% MAJOR UPDATE FOR THE CODE AND JUST TRACK THE CHANGE!!!!
+%
 %==========================================================================
 % ID initial data structure
 % D  the actual thickness
@@ -7,7 +13,9 @@ function [tau_D,etaum,ID] = compute_drag_stress(ID,D,dDdt)
 %==========================================================================
 %Output:
 %==========================================================================
-%tau_D converged tau_D
+%tau_M converged tau_M converged mantle stresses assuming that the average
+%stress within the couette flow arises from the average strain within the
+%couette flow
 %converged,eta_um
 % iteration scheme initial guess -> compute a value, use the value as
 %initial guess -> compute a new one till abs(x(n-1)-xn)<1e-10
@@ -32,17 +40,17 @@ end
 if length(dDdt)>1
     n_points = length(dDdt);
     etaum = zeros(n_points,1);
-    tau_D = zeros(n_points,1);
+    tau_M = zeros(n_points,1);
     for i=1:n_points
-    [etaum(i), tau_D(i)] =  compute_drag_stress_etaD(ID,dDdt(i),D(i)); 
+    [etaum(i), tau_M(i)] =  compute_drag_stress_etaD(ID,dDdt(i),D(i)); 
     end
 else
 
- [etaum, tau_D] =  compute_drag_stress_etaD(ID,dDdt,D); 
+ [etaum, tau_M] =  compute_drag_stress_etaD(ID,dDdt,D); 
 
  if nargin == 0 
-    [tau_D_,Lambda_] = compute_drag_stressA(ID.ID_A,D/ID.D0,dDdt/(D*(ID.ec))); 
-    res_stress = tau_D_-tau_D/ID.s0; 
+    [tau_M_,Lambda_] = compute_drag_stressA(ID.ID_A,D/ID.D0,dDdt/(D*(ID.ec))); 
+    res_stress = tau_M_-tau_M/ID.s0; 
     % compute Lambda: 
     Lambda_A   = ID.Lambda/(1+(ID.Df_UM)*(abs(tau_D_))^(ID.n-1));
     Lambda_D   = (etaum/((1/ID.eta0+1/(ID.Df*ID.eta0))^(-1)))*((ID.l0*ID.alpha)/(2*ID.s));
@@ -60,7 +68,7 @@ end
 end
 
 
-function [eta_um,tau_D] = compute_drag_stress_etaD(ID,dDdt,D)
+function [eta_um,tau_M] = compute_drag_stress_etaD(ID,dDdt,D)
 %=====================================================================%
 % Input: ID   : structure containing the initial data (to improve)    %
 %        dDdt : the converged dDdt                                    %
@@ -85,15 +93,15 @@ function [eta_um,tau_D] = compute_drag_stress_etaD(ID,dDdt,D)
 % Prepare the initial value
 % compute the initial strain rate
 
-eps_A = abs(ID.alpha*(ID.D0^2./D.^2).*dDdt.*1/ID.s);
+eps_A = abs(ID.alpha*(ID.D0^2./D.^2).*dDdt.*1/ID.l0);
 eta_n = (2*ID.B_n_um^(1/ID.n)*eps_A^((ID.n-1)/ID.n))^(-1);
 eta_eff_g =(1/ID.etaum+1/eta_n)^-1;
 %options = optimset('PlotFcns',{@optimplotx,@optimplotfval});
 tau_g    = (2*eta_eff_g*eps_A);                               %Here there is a mistake, perhaps correct intuition, but i need a way to find out 
 fun      = @(x) f_zero_L_TD(x,dDdt,D,ID,eps_A);
-tau_D    = fzero(fun,abs(tau_g));
-eta_um   = ID.etaum/(1+ID.Df_UM*(abs(tau_D)/ID.s0)^(ID.n-1));
-tau_D    = tau_D*sign(dDdt); 
+tau_M    = fzero(fun,abs(tau_g));
+eta_um   = ID.etaum/(1+ID.Df_UM*(abs(tau_M)/ID.s0)^(ID.n-1));
+tau_M    = tau_M*sign(dDdt); 
 end
 
 

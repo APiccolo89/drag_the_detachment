@@ -14,8 +14,10 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     %%
     %Main Function
     if(nargin==0)
+        addpath ../Utilities/
+        addpath ../Adimensional/
         Benchmark = 1;  
-        ID = Compute_slab_characteristics();
+        ID = Compute_slab_characteristics(NaN);
     end
     
     % Compute the initial guess of the dDdt 

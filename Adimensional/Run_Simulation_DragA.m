@@ -18,7 +18,7 @@ function Testdata = Run_Simulation_DragA(ID_A)
     Benchmark = 0 ;
     if(nargin==0)
        % Benchmark = 1;  
-        ID_ = Compute_slab_characteristics();
+        ID_ = Compute_slab_characteristics(NaN);
         ID_A  = ID_.ID_A;
     end
     

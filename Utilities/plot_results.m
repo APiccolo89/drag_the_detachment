@@ -42,9 +42,8 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
        Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
        Data_S(6,i) = TD.t_t_det;
        Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det); 
-       Data_S(8,i) = TD.Interpolation.error_DA(1);
-       Data_S(9,i) = TD.Interpolation.error_DA(2);
-       Data_S(10,i) = TD.Interpolation.error_DA(3);
+       Data_S(8,i) = TD.initial_data.Df;
+       Data_S(9,i) = TD.initial_data.D0/TD.initial_data.l0;
        i = i+1;
     end
 
@@ -60,55 +59,72 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
     tic
     plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave)
     toc
+    plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave)
+    tic
+    plot1D_setExp(Tests,Data_S,name,'Exp',ptsave)
+    toc
+
 end
 
 function plot_scatter(Data_S,name,ptsave,field) 
 c = Data_S(2,:);
 double = 0; 
+figure(1)
+
 if strcmp(field,'t_det')
     x = Data_S(1,:);
     y = Data_S(3,:);
-    ylabel('t^O_d/t^P_d [n.d]')
+    ylabel_ = ('$\frac{t}{t_d}$ [n.d]');
+    ylim_=[1,10];
     fin = 'Global_test1DS_time_det';
 elseif strcmp(field,'tau_ii')
     x = Data_S(1,:);
     y = Data_S(4,:); % tau max
     y2 = Data_S(6,:); % tau @ detachment
-    ylabel('$\frac{\tau_{eff}}{\tau_{B_0}}$','interpreter','latex');
+    ylabel_=('$\frac{\tau_{eff}}{\tau_{B_0}}$');
+    ylim_ = [1,7.0];
     double = 1.0 ; 
     fin = 'Global_test1DS_Stress';
 
 elseif strcmp(field,'time_max-time det')
     x = Data_S(1,:);
     y = Data_S(3,:)-Data_S(5,:);
-    ylabel('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$','interpreter','latex');
+    ylabel_=('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$')
     fin = 'Global_test1DS_dT';
-
+    ylim_ = [0,0]
 elseif strcmp(field,'t_det_error')
     x = Data_S(1,:);
     y = Data_S(7,:);
-    ylabel('t^D_{det}-t^A_{det} [n.d.]');
+    ylabel_ =('t^D_{det}-t^A_{det} [n.d.]');
     fin = 'Global_test1_error';
+    ylim_ = [0,0]
 
 
 elseif strcmp(field,'error_gl')
     x = Data_S(1,:);
     y = Data_S(8,:);
     y_err = Data_S(9,:)-Data_S(10,:);
-    ylabel('$mean(D_A(t)-D_D(t)$, mean error dimension D, adimensional D ','interpreter','latex');
+    ylabel_ = ('$mean(D_A(t)-D_D(t)$, mean error dimension D, adimensional D ');
     fin = 'Global_test1_error_GL';
-end
-figure(1)
-scatter(x,y,20,c,'filled','d')
-hold on 
+    ylim_ = [0,0];
 
-if double >0 
-    scatter(x,y2,5,c,'filled','o','MarkerEdgeColor','k','LineWidth',0.5)
-    legend({'$max(\frac{\tau_{II}}{\tau_{B,0}})$','$\frac{\tau^{Det}_{II}}{\tau_{B,0}}$'},'Interpreter','latex');
- end
+end
+s = 1;%Data_S(9,:);
+
+scatter(x(Data_S(8,:)==0.5),y(Data_S(8,:)==0.5),10,"black",'filled','d')
+
+hold on 
+scatter(x(Data_S(8,:)==1.0),y(Data_S(8,:)==1.0),20,"black",'filled','o')
+scatter(x(Data_S(8,:)==10.0),y(Data_S(8,:)==10.0),30,"black",'+')
+legend({'$ \xi = 0.1 $','$ \xi = 1.0$','$ \xi = 10.0 $'},'Interpreter','latex');
+
+%if double >0 
+ %   scatter(x,y2,5,c,'filled','o','MarkerEdgeColor','k','LineWidth',0.5)
+  %  legend({'$max(\frac{\tau_{II}}{\tau_{B,0}})$','$\frac{\tau^{Det}_{II}}{\tau_{B,0}}$'},'Interpreter','latex');
+ %end
 
 try
-    cmap = colormap(crameri('berlin'));
+    cmap = colormap(crameri('nuuk'));
 catch
     cmap = colormap('jet');
 end
@@ -117,17 +133,16 @@ c=colorbar;
 c.Label.String = 'log10(\Psi) [n.d.]';
 grid on
 box on
-xlabel('\Lambda [n.d.]')
+xlabel('$log_{10}(\Lambda)$[n.d.]',Interpreter='latex')
+ylabel(ylabel_,Interpreter='latex')
+if ylim_(2) == 0
+    disp('none')
+else
+    ylim(ylim_);
+end
 %ylabel('t^O_d/t^P_d [n.d]')
-%ylim([0.8,20])
-if strcmp(field,'t_det')
-    ylabel('t^O_d/t^P_d [n.d]')
- elseif strcmp(field,'tau_ii')
-    ylabel('$\frac{\tau_{eff}}{\tau_{B_0}}$','Interpreter','latex'); 
-elseif strcmp(field,'time_max-time det')
-    ylabel('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$','Interpreter','latex');
- end
 set(gca, 'XScale', 'log')
+xlim([10^(-7.3),10^(0)])
 name_picture = strcat(fin,name,'.png');
 pt=fullfile(ptsave,'SCAT');
 if not(isfolder(pt))
@@ -146,8 +161,8 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     % Collect the field names 
     fn = fieldnames(Tests);
     % Set the min and max of lambda value for the coloring of the plot
-    z_min = log10(min(Data_S(1,:)));
-    z_max  =log10(max(Data_S(1,:)));
+    z_min =  -7;%log10(min(Data_S(1,:)));
+    z_max = -1; %log10(max(Data_S(1,:)));
     % See if the user installed Crameri cmap utilities, otherwise punish
     % him with jet colormap by default
     % Shamelessly copied from 
@@ -159,12 +174,16 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
         VAL=1; 
     elseif strcmp(field,'epsilon')
         VAL = 2.0;
+    elseif strcmp(field,'tau_D_tau_B')
+        VAL = 3.0;
+    elseif strcmp(field,'Lambda')
+        VAL =4.0;
     else 
-        VAL = 3.0; 
+        VAL = 5; 
     end
 
     try
-        cmap = colormap(crameri('Bilbao'));
+        cmap = colormap(crameri('nuuk'));
     catch
         cmap = colormap('jet');
     end
@@ -200,10 +219,21 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
            buf = TD.eps(1,:);
            ylabel('$\frac{\dot{\varepsilon}_{II}}{\dot{\varepsilon}_{B,0}} [n.d.]$','interpreter','latex')
            set(gca, 'YScale', 'log')
-       else
-           buf = log10(-TD.tau(2,:)./TD.tau(1,:));
+       elseif VAL ==3 || VAL == 5
+           buf = (-TD.tau(2,:)./TD.tau(1,:));
+           if VAL == 5
+               buf = buf/TD.initial_data.Lambda; 
+           else
            ylabel('$\frac{\tau_{D}}{\tau_{B}} [n.d.]$','interpreter','latex')
+           end
            set(gca, 'YScale', 'log')
+       elseif VAL == 4
+           buf = (TD.Lambda);
+           ylabel('$ \Lambda(t) [n.d.]$','interpreter','latex')
+           set(gca, 'YScale', 'log')
+       else 
+            
+
        end
 
        % Normalize Lambda value w.r.t. the limit that I assumed to be
@@ -217,10 +247,18 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
        V=round(1+V*(size(cmap,1)-1));%round to nearest index
        C = cmap(V,:);
        hold on 
-       plot(TD.time*TD.initial_data.n,buf,'Color',C)
+       if VAL  <5
+           x = TD.time*TD.initial_data.n; 
+           xlim([0,10])
+           xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
+       else
+           x = TD.D_norm;
+           xlim([0.1,1.0])
+           xlabel('$\frac{D}{D_0} [n.d.]$','Interpreter','latex')
+       end
+       plot(x,buf,'Color',C,LineWidth=1.3)
        grid on 
-       xlim([0,10])
-       xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
+           
        i = i+1; 
     end
     box on

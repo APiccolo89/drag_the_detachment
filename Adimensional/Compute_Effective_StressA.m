@@ -31,8 +31,11 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
 
     if isnan(ID_A.Df_UM) || ~ID_A.Df_UM 
         tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt;
+        non_linear_um = 0.0; 
     else
-        [tau_D,Lambda] = compute_drag_stressA(ID_A,D,dDdt); 
+        [tau_M,Lambda] = compute_drag_stressA(ID_A,D,dDdt); 
+        tau_D = Lambda.*tau_B.^3.*dDdt;
+
     end
 
     % Effective stress
@@ -53,5 +56,6 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
         varargout{1} = tau_eff;
         varargout{2} = tau_B; 
         varargout{3} = tau_D; 
+        varargout{4} = 0; 
     end
 end

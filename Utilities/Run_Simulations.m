@@ -71,7 +71,6 @@ function [Temp]=Processing_simulation(eta0,Df,n,l0,s0,D0,etaum,Benchmark,Df_UM,l
     Temp = Testdata;
     Temp.Testdata_a=Testdata_a;
     Temp.initial_data = ID;
-    Temp.Interpolation = Interpolation; 
     ID = [];
     Testdata = [];
 end

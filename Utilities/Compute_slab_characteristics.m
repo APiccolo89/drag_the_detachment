@@ -21,14 +21,14 @@ function [ID] = Compute_slab_characteristics(eta0,Df,n,l0,s0,D0,etaum,Df_UM)
 %==================================================================
 if nargin == 0 || nargin == 1 %default value for the unit test:
     eta0 =1e22;
-    Df =10;
+    Df =10.0;
     n = 3.5;
     l0 = 300e3;
     s0 = 100e6;
     D0 = 80e3;
     etaum = 1e21;
     if nargin == 0
-        Df_UM = 10;
+        Df_UM = 10.0;
     else
         Df_UM = NaN;
     end
@@ -65,8 +65,8 @@ etaS_eff = (1/eta0+1/(Df*eta0))^(-1); % effective viscosity of the slab at refer
 Psi      = etaum/etaS_eff;    % ratio between the upper mantle viscosity and the slab viscosity
 % Alpha
 alpha = 5.0;                 % Ancient parameter derived by Yanick et al. 1986
-s     = 1000e3;
-len = l0/(2*1000e3);         % Length divided by a characteristic lenght scale (i.e. size of my model)
+s     = l0;
+len = l0/(2*s);         % Length divided by a characteristic lenght scale (i.e. size of my model)
 Lambda = len*alpha*Psi;      % Parameter derived by 2D numerical simulation
 B_n_um = (Df_UM*s0^(1-n))/(2*etaum);
 

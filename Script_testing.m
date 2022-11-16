@@ -11,16 +11,16 @@ Benchmark = 0.0 ; % Benchmark activaction flag
 %Parameter to test: 
 % To do: 
 % Generate a data structure and labelling. 
-l0_v    = (300e3:100e3:600e3);                 % initial length
+l0_v    = (300e3:10e3:600e3);                 % initial length
 D0      = 80e3;                       % thickness
 % Slab Rheology
-eta0_v = [10.^(22:1:23)];                   % [Pas] refernce power law viscosity slab 
-Df_v   = [10.0];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
-n_v     =[ 3.5];                       % [n.d.] pre-exponential factor
-s0_v  = [100e6:50e6:200e6];                   % [Pa]  reference buoyancy stress
+eta0_v = [1e23];                   % [Pas] refernce power law viscosity slab 
+Df_v   = [1.0, 10, 100];                          % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+n_v     =[ 3.5,2.0,7.0,9.0];                       % [n.d.] pre-exponential factor
+s0_v  = [100e6:100e6:200e6];                   % [Pa]  reference buoyancy stress
 % Upper Mantle
-etaum_v =[10.^(22)];    % [Pa.s]vector of the mantle viscosity
-Df_UM   = 100; 
+etaum_v =[1e21];    % [Pa.s]vector of the mantle viscosity
+Df_UM   =10^(2.7035); 
 name_tests_v = {'D0_80km_n_3dot5_Df_EXT','D0_80km_n_2dot0_Df_EXT','D0_80km_n_7dot0_Df_EXT','D0_80km_n_9dot0_Df_EXT'};
 
 ptsave = 'Tests_result';

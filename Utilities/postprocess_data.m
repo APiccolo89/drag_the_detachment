@@ -42,7 +42,7 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
         Testdata.D_norm = D/ID.D0;
         Testdata.t_det   = te/ID.tc;
     elseif Dim == 0 
-        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,1);
+        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,non_linear_um);
         [eps_eff,eps_d,eps_n] = Compute_StrainA(ID,t_eff); 
         tau = [t_B,t_D,t_eff];
         eps = [eps_eff,eps_d,eps_n];

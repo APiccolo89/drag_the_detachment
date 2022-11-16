@@ -1,4 +1,4 @@
-function [tau_D,Lambda] = compute_drag_stressA(ID,D,dDdt)
+function [tau_M,Lambda] = compute_drag_stressA(ID,D,dDdt)
 %Input:
 %==========================================================================
 % ID initial data structure
@@ -7,7 +7,7 @@ function [tau_D,Lambda] = compute_drag_stressA(ID,D,dDdt)
 %==========================================================================
 %Output:
 %==========================================================================
-%tau_D converged tau_D
+%tau_D converged tau_D of the mantle
 %converged,eta_um
 %
 %==========================================================================
@@ -28,18 +28,18 @@ end
 if length(dDdt)>1
     n_points = length(dDdt);
     Lambda = zeros(n_points,1);
-    tau_D = zeros(n_points,1);
+    tau_M = zeros(n_points,1);
     for i=1:n_points
-        [Lambda(i), tau_D(i)] =  compute_drag_stress_etaA(ID,dDdt(i),D(i));
+        [Lambda(i), tau_M(i)] =  compute_drag_stress_etaA(ID,dDdt(i),D(i));
     end
 else
 
-    [Lambda, tau_D] =  compute_drag_stress_etaA(ID,dDdt,D);
+    [Lambda, tau_M] =  compute_drag_stress_etaA(ID,dDdt,D);
 
 if nargin == 0 
     [tau_D_D, eta_um] = compute_drag_stress(ID_,D*ID_.D0,dDdt*ID_.D0/ID_.tc); 
     tau_D_D_ = tau_D_D/ID_.s0;
-    res_stress = tau_D_D_-tau_D; 
+    res_stress = tau_D_D_-tau_M; 
     % compute Lambda: 
     Lambda_D   = ID_.Lambda/(1+(ID_.Df_UM)*(abs(tau_D_D/ID_.s0))^(ID_.n-1));
     res_lambda = Lambda_D-Lambda;
@@ -59,7 +59,7 @@ end
 end
 
 
-function [Lambda,tau_D] = compute_drag_stress_etaA(ID,dDdt,D)
+function [Lambda,tau_M] = compute_drag_stress_etaA(ID,dDdt,D)
 %=====================================================================%
 % Input: ID   : structure containing the initial data (to improve)    %
 %        dDdt : the converged dDdt                                    %
@@ -83,7 +83,7 @@ function [Lambda,tau_D] = compute_drag_stress_etaA(ID,dDdt,D)
 %======================================================================
 % Prepare the initial value
 % compute the initial strain rate
-eps_A = abs((ID.alpha/ID.s)*(ID.D0/D)^2*dDdt);
+eps_A = abs((ID.alpha/ID.L0)*(ID.D0/D)^2*dDdt);
 eta_n = (2*ID.B_n_um^(1/ID.n)*eps_A^((ID.n-1)/ID.n))^(-1);
 eta_eff_g =(1/ID.etaum+1/eta_n)^-1;
 % Compute the new initial guess Lambda
@@ -91,9 +91,9 @@ Lambda_g = (eta_eff_g/ID.etaS)*(ID.L0*ID.alpha)/ID.s;
 % fzero
 tau_g    = 2*eta_eff_g*eps_A;
 fun      = @(x) f_zero_L_T(x,dDdt,D,ID,eps_A);
-tau_D    = fzero(fun,tau_g);
-Lambda   = ID.Lambda/(1+ID.Df_UM*(abs(tau_D))^(ID.n-1));
-tau_D    = tau_D*sign(dDdt);
+tau_M    = fzero(fun,tau_g);
+Lambda   = ID.Lambda/(1+ID.Df_UM*(abs(tau_M))^(ID.n-1));
+tau_M    = tau_M*sign(dDdt);
 
 end
 
