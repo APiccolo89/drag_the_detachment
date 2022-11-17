@@ -1,4 +1,4 @@
-function Testdata = Run_Simulation_Drag(ID,Benchmark)
+function Testdata = Run_Simulation_Drag(ID,Benchmark,nlm)
     %Compute the D,t of the slab detachment. 
     % Output Parameter: 
     % Testdata => structure containing all the solution output that are then
@@ -14,7 +14,6 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     %%
     %Main Function
     if(nargin==0)
-        addpath ../Utilities/
         addpath ../Adimensional/
         Benchmark = 1;  
         ID = Compute_slab_characteristics(NaN);
@@ -24,7 +23,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     % 1) Assuming that drag force is not active
     dDdt0 = -(ID.tc)^(-1)*ID.D0;
     % Create function handle 
-    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,0);
+    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,0,nlm);
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
@@ -37,7 +36,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     % Function to post process the stress, strain and so forth
     % place holder
     % save relevant data of the simulation:
-    [Testdata]=postprocess_data(t,D,ID,te,De,ie,1,Benchmark); 
+    [Testdata]=postprocess_data(t,D,ID,te,De,ie,1,Benchmark,nlm); 
     
     if nargin == 0 
     % run the twin test adimensional and check the residuum between the two
@@ -49,7 +48,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark)
     end
 end
 
-function [res] = compute_dragODE(D,dDdt,ID,Benchmark)
+function [res] = compute_dragODE(D,dDdt,ID,Benchmark,nlm)
     % Output: 
     % res => Residuum of non linear equation 
     % Input : 
@@ -61,7 +60,7 @@ function [res] = compute_dragODE(D,dDdt,ID,Benchmark)
     % and cast the problem of necking in term of optimization. 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Compute the effective stress 
-    [tau_eff,tau_B,tau_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,0);
+    [tau_eff,tau_B,tau_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
     [eps_eff,eps_dif,eps_dis] = Compute_StrainD(ID,tau_eff,Benchmark);
     D_ = D/ID.D0;
     eps_ = eps_eff/ID.ec;

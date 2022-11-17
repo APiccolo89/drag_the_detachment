@@ -1,4 +1,4 @@
-function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
+function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark,nlm)
     % =====================================================================
     % post process the data using the same function used to compute the raw
     % results. 
@@ -22,18 +22,13 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
     dDdt = (D(2:1:end)-D(1:end-1))./(t(2:1:end)-t(1:1:end-1));
     D = 0.5*(D(1:1:end-1)+D(2:1:end));
     t   = 0.5*(t(1:1:end-1)+t(2:1:end));
-    if isnan(ID.Df_UM)
-        non_linear_um = 0.0;
-    else
-        non_linear_um = 1.0;
-    end
-    if Dim == 1
-        if non_linear_um == 0
-            [t_eff,t_B,t_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um);
-        else
-            [t_eff,t_B,t_D,ID,eta_um] = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um);
-            Lambda = (eta_um./((1/ID.eta0+1/(ID.Df*ID.eta0)))^-1);
 
+    if Dim == 1
+        if nlm.islinear
+            [t_eff,t_B,t_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
+        else
+            [t_eff,t_B,t_D,ID,eta_um] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
+            Lambda = ((eta_um./((1/ID.eta0NS+1/(ID.eta0DS)))^-1)).*ID.len.*ID.alpha;
         end
         [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff,Benchmark); 
         tau = [t_B,t_D,t_eff]./ID.s0;
@@ -42,7 +37,7 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
         Testdata.D_norm = D/ID.D0;
         Testdata.t_det   = te/ID.tc;
     elseif Dim == 0 
-        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,non_linear_um);
+        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,nlm);
         [eps_eff,eps_d,eps_n] = Compute_StrainA(ID,t_eff); 
         tau = [t_B,t_D,t_eff];
         eps = [eps_eff,eps_d,eps_n];
@@ -66,7 +61,13 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
         Testdata.time_t_M = time_t_M;
     end
     Testdata.t_t_det  = Testdata.tau(3,end);
-    if non_linear_um == 1
+    if nlm.islinear == 0
         Testdata.Lambda = Lambda; 
+        if Dim == 1
+            Testdata.eta_um  = eta_um;
+        end
+    else 
+        Testdata.Lambda = []; 
+        Testdata.etaum  = []; 
     end
 end

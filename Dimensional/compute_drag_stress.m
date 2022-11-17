@@ -52,8 +52,8 @@ else
     [tau_M_,Lambda_] = compute_drag_stressA(ID.ID_A,D/ID.D0,dDdt/(D*(ID.ec))); 
     res_stress = tau_M_-tau_M/ID.s0; 
     % compute Lambda: 
-    Lambda_A   = ID.Lambda/(1+(ID.Df_UM)*(abs(tau_D_))^(ID.n-1));
-    Lambda_D   = (etaum/((1/ID.eta0+1/(ID.Df*ID.eta0))^(-1)))*((ID.l0*ID.alpha)/(2*ID.s));
+    Lambda_A   = ID.Lambda/(1+(ID.Df_UM)*(abs(tau_M_))^(ID.n-1));
+    Lambda_D   = (etaum/((1/ID.eta0NS+1/(ID.eta0DS))^(-1)))*((ID.l0*ID.alpha)/(2*ID.s));
     res_lambda = Lambda_A-Lambda_D; 
     disp(['===================================================================='])
     disp('  Residuum between computed by dimensional and adimensional is: ')
@@ -95,12 +95,12 @@ function [eta_um,tau_M] = compute_drag_stress_etaD(ID,dDdt,D)
 
 eps_A = abs(ID.alpha*(ID.D0^2./D.^2).*dDdt.*1/ID.l0);
 eta_n = (2*ID.B_n_um^(1/ID.n)*eps_A^((ID.n-1)/ID.n))^(-1);
-eta_eff_g =(1/ID.etaum+1/eta_n)^-1;
+eta_eff_g =(1/ID.eta0DM+1/eta_n)^-1;
 %options = optimset('PlotFcns',{@optimplotx,@optimplotfval});
 tau_g    = (2*eta_eff_g*eps_A);                               %Here there is a mistake, perhaps correct intuition, but i need a way to find out 
 fun      = @(x) f_zero_L_TD(x,dDdt,D,ID,eps_A);
 tau_M    = fzero(fun,abs(tau_g));
-eta_um   = ID.etaum/(1+ID.Df_UM*(abs(tau_M)/ID.s0)^(ID.n-1));
+eta_um   = ID.eta0DM/(1+ID.Df_UM*(abs(tau_M)/ID.s0)^(ID.n-1));
 tau_M    = tau_M*sign(dDdt); 
 end
 

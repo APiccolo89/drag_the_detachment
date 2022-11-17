@@ -42,7 +42,7 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
        Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
        Data_S(6,i) = TD.t_t_det;
        Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det); 
-       Data_S(8,i) = TD.initial_data.Df;
+       Data_S(8,i) = TD.initial_data.Df_S;
        Data_S(9,i) = TD.initial_data.D0/TD.initial_data.l0;
        i = i+1;
     end

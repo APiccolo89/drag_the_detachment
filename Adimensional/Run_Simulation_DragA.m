@@ -1,4 +1,4 @@
-function Testdata = Run_Simulation_DragA(ID_A)
+function Testdata = Run_Simulation_DragA(ID_A,nlm)
     %Compute the D,t of the slab detachment.
     %======================================================================
     % Output Parameter: 
@@ -20,17 +20,18 @@ function Testdata = Run_Simulation_DragA(ID_A)
        % Benchmark = 1;  
         ID_ = Compute_slab_characteristics(NaN);
         ID_A  = ID_.ID_A;
+        nlm   = Problem_type.Linear; 
     end
     
     % 1) Assuming that drag force is not active
     dDdt0 = -ID_A.dDdtB;
     % Create function handle 
-    Funf_wi = @(t,x,xp0) compute_dragODEA(x,xp0,ID_A);
+    Funf_wi = @(t,x,xp0) compute_dragODEA(x,xp0,ID_A,nlm);
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 10],ID_A.D0,dDdt0,options);
-    [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,1.0); 
+    [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,0,nlm); 
     if nargin == 0 
     % run the twin test adimensional and check the residuum between the two
     % functions. {Is giving allmost the same results?)
@@ -42,7 +43,7 @@ function Testdata = Run_Simulation_DragA(ID_A)
 
 end
 
-function [res] = compute_dragODEA(D,dDdt,ID_A)
+function [res] = compute_dragODEA(D,dDdt,ID_A,nlm)
     % Output: 
     % res => Residuum of non linear equation
     %======================================================================
@@ -55,7 +56,7 @@ function [res] = compute_dragODEA(D,dDdt,ID_A)
     % and cast the problem of necking in term of optimization. 
     %======================================================================
     % Compute the effective stress 
-    [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A,0);
+    [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A,nlm);
     [epsilon_eff,eps_dif,eps_dis] = Compute_StrainA(ID_A,tau_eff);
     res                           = -D*(epsilon_eff)-dDdt;
 end

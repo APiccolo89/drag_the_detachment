@@ -1,4 +1,4 @@
-function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um)
+function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm)
     % Compute effective stress
     % Input data: 
     % D => Actual thickness 
@@ -23,13 +23,14 @@ function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um
         check_B  = 2.00E+08;
         check_Eff = 1.88E+08;
         Benchmark = 0; 
+        nlm = Problem_type.Linear;
     end
     % Buoyancy stress computed tau_B = F_B/2/D; 
     tau_B = (ID.s0*ID.D0)./D;
     % Drag force related stress compute formulation of Bercovici et al 2015 
     % Compute the effective stress and effective viscosity 
     
-    if isnan(ID.Df_UM) || ~ID.Df_UM 
+    if nlm.islinear 
         tau_D = (2*ID.etaum*ID.alpha*(ID.D0^2./D.^2).*dDdt.*ID.len)./2./D;
     else
         [tau_M,eta_um,ID] = compute_drag_stress(ID,D,dDdt); 
@@ -71,7 +72,7 @@ function varargout = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um
     
     % Effective stress
     tau_eff = tau_B+tau_D;
- if non_linear_um == 1 
+ if nlm.islinear == 0  
         varargout{1} = tau_eff;
         varargout{2} = tau_B; 
         varargout{3} = tau_D; 

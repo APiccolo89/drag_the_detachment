@@ -1,4 +1,4 @@
-function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
+function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
     % Compute the adimensional effective stress. 
     % Input ID_A: initial input adimensionalized with the characteristic
     % length scale, and computation of Lambda parameter that suits the
@@ -23,20 +23,20 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
         check_eff       = 1.988;
         check_drag      = -0.012;
         check_B         = 2.0; 
+        nlm = Problem_type.Linear;
     end
    
 
     tau_B = (ID_A.D0./D);
     % Drag force related stress compute formulation of Bercovici et al 2015 
 
-    if isnan(ID_A.Df_UM) || ~ID_A.Df_UM 
-        tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt;
-        non_linear_um = 0.0; 
+    if nlm.islinear
+        tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt; 
     else
         [tau_M,Lambda] = compute_drag_stressA(ID_A,D,dDdt); 
         tau_D = Lambda.*tau_B.^3.*dDdt;
-
     end
+    tau_eff = tau_B+tau_D;
 
     % Effective stress
     if nargin == 0
@@ -46,8 +46,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
             disp('Nothing to declear, I am innocent')
         end
     end
-    tau_eff = tau_B+tau_D;
-    if non_linear_um == 1 
+    if nlm.islinear == 0 
         varargout{1} = tau_eff;
         varargout{2} = tau_B; 
         varargout{3} = tau_D; 
@@ -56,6 +55,6 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,non_linear_um)
         varargout{1} = tau_eff;
         varargout{2} = tau_B; 
         varargout{3} = tau_D; 
-        varargout{4} = 0; 
+        varargout{4} = ID_A.Lambda; 
     end
 end
