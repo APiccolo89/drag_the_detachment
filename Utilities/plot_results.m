@@ -33,18 +33,29 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
     Data_S = zeros(10,itest); 
     i = 1;
     for k = 1:numel(fn) 
-       
+     
        TD = Tests.(fn{k});
+       
        Data_S(1,i) = TD.initial_data.Lambda;
        Data_S(2,i) = log10(TD.initial_data.Psi); 
-       Data_S(3,i) = TD.initial_data.n*TD.t_det;
-       Data_S(4,i) = TD.t_t_max;
-       Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
-       Data_S(6,i) = TD.t_t_det;
-       Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det); 
+       if ~isempty(TD.t_det) && isreal(TD.D_norm)
+        Data_S(3,i) = TD.initial_data.n*TD.t_det;
+        Data_S(4,i) = TD.t_t_max;
+        Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
+        Data_S(6,i) = TD.t_t_det;
+        Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det);
+        Data_S(10,i) = 1.0 ; 
+       else
+        Data_S(3,i) = nan;
+        Data_S(4,i) = nan;
+        Data_S(5,i) = nan;
+        Data_S(6,i) = nan;
+        Data_S(7,i) = nan;
+        Data_S(10,i) = -1.0 ; 
+       end 
        Data_S(8,i) = TD.initial_data.Df_S;
        Data_S(9,i) = TD.initial_data.D0/TD.initial_data.l0;
-       i = i+1;
+       i = i+1
     end
 
     tic
@@ -161,8 +172,8 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     % Collect the field names 
     fn = fieldnames(Tests);
     % Set the min and max of lambda value for the coloring of the plot
-    z_min =  -7;%log10(min(Data_S(1,:)));
-    z_max = -1; %log10(max(Data_S(1,:)));
+    z_min =  round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
     % See if the user installed Crameri cmap utilities, otherwise punish
     % him with jet colormap by default
     % Shamelessly copied from 
@@ -183,7 +194,7 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     end
 
     try
-        cmap = colormap(crameri('nuuk'));
+        cmap = colormap(crameri('hawaii'));
     catch
         cmap = colormap('jet');
     end
@@ -208,57 +219,58 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     i = 1; % iterator 
     for k = 1:numel(fn) 
        TD = Tests.(fn{k});
-       if VAL == 0 
-           buf = TD.D_norm; 
-           ylim([0.1,1.0])
-           ylabel('$\frac{D}{D_0} [n.d.]$','interpreter','latex')
-       elseif VAL == 1
-           buf = TD.tau(3,:);
-           ylabel('$\frac{\tau_{eff}}{\tau_{B,0}} [n.d.]$','interpreter','latex')
-       elseif VAL==2 
-           buf = TD.eps(1,:);
-           ylabel('$\frac{\dot{\varepsilon}_{II}}{\dot{\varepsilon}_{B,0}} [n.d.]$','interpreter','latex')
-           set(gca, 'YScale', 'log')
-       elseif VAL ==3 || VAL == 5
-           buf = (-TD.tau(2,:)./TD.tau(1,:));
-           if VAL == 5
-               buf = buf/TD.initial_data.Lambda; 
-           else
-           ylabel('$\frac{\tau_{D}}{\tau_{B}} [n.d.]$','interpreter','latex')
+       if Data_S(10,i) > 0.0
+           if VAL == 0 
+               buf = TD.D_norm; 
+               ylim([0.1,1.0])
+               ylabel('$\frac{D}{D_0} [n.d.]$','interpreter','latex')
+           elseif VAL == 1
+               buf = TD.tau(3,:);
+               ylabel('$\frac{\tau_{eff}}{\tau_{B,0}} [n.d.]$','interpreter','latex')
+           elseif VAL==2 
+               buf = TD.eps(1,:);
+               ylabel('$\frac{\dot{\varepsilon}_{II}}{\dot{\varepsilon}_{B,0}} [n.d.]$','interpreter','latex')
+               set(gca, 'YScale', 'log')
+           elseif VAL ==3 || VAL == 5
+               buf = (-TD.tau(2,:)./TD.tau(1,:));
+
+               ylabel('$\frac{\tau_{D}}{\tau_{B}} [n.d.]$','interpreter','latex')
+               
+               set(gca, 'YScale', 'log')
+           elseif VAL == 4
+               buf = (TD.Lambda);
+               ylabel('$ \Lambda(t) [n.d.]$','interpreter','latex')
+               set(gca, 'YScale', 'log')
+           else 
+                
+    
            end
-           set(gca, 'YScale', 'log')
-       elseif VAL == 4
-           buf = (TD.Lambda);
-           ylabel('$ \Lambda(t) [n.d.]$','interpreter','latex')
-           set(gca, 'YScale', 'log')
-       else 
-            
+    
+           % Normalize Lambda value w.r.t. the limit that I assumed to be
+           % likely
+           V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
+           if V<0 
+               V=0;
+           elseif V>1
+                V=1;
+           end
+           V=round(1+V*(size(cmap,1)-1));%round to nearest index
+           C = cmap(V,:);
+           hold on 
+           if VAL  <5
+               x = TD.time*TD.initial_data.n; 
+               xlim([0,10])
+               %set(gca, 'XScale', 'log')
 
-       end
-
-       % Normalize Lambda value w.r.t. the limit that I assumed to be
-       % likely
-       V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
-       if V<0 
-           V=0;
-       elseif V>1
-            V=1;
-       end
-       V=round(1+V*(size(cmap,1)-1));%round to nearest index
-       C = cmap(V,:);
-       hold on 
-       if VAL  <5
-           x = TD.time*TD.initial_data.n; 
-           xlim([0,10])
-           xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
-       else
-           x = TD.D_norm;
-           xlim([0.1,1.0])
-           xlabel('$\frac{D}{D_0} [n.d.]$','Interpreter','latex')
-       end
-       plot(x,buf,'Color',C,LineWidth=1.3)
-       grid on 
-           
+               xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
+           else
+               x = TD.D_norm;
+               xlim([0.1,1.0])
+               xlabel('$\frac{D}{D_0} [n.d.]$','Interpreter','latex')
+           end
+           plot(x,buf,'Color',C,LineWidth=1.3)
+           grid on 
+       end        
        i = i+1; 
     end
     box on

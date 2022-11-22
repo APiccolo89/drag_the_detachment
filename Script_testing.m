@@ -57,16 +57,16 @@ if not(isfolder(ptsave))
 end
 
 %Geometric properties of the Slab 
-l0_v      = (300e3:10e3:600e3);         % initial length [m]
+l0_v      = (300e3:100e3:600e3);         % initial length [m]
 D0_v      = 80e3;                       % thickness [m]
 s0_v      = [100e6:100e6:200e6];        % reference buoyancy stress [Pa]
 % Slab Rheology
-eta0DS_v  = [1e22,1e23,1e24];                      % [Pas] reference diffusion creep viscosity of the slab 
-DfS_v     = [1.0, 10, 100];               % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
-n_v       = [ 3.5,2.0,7.0,9.0];            % [n.d.] pre-exponential factor
+eta0DS_v  = [1e23,1e24];                      % [Pas] reference diffusion creep viscosity of the slab 
+DfS_v     = [10.0];               % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress 
+n_v       = [3.5,2.0,7.0,9.0];            % [n.d.] pre-exponential factor
 % Upper Mantle
 eta0DM_v  = [1e19,1e20,1e21,1e22];                       % [Pas] reference diffusion creep viscosity of the upper mantle 
-DfM_v     = 10.^(3:7);                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+DfM_v     = 10.^[2 3 4 7];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
 nlm       = Problem_type.NonLinear;     % Switching the position of linear-non_linear activate the non linear upper mantle routine. 
 %==========================================================================
 

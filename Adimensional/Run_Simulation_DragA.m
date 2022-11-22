@@ -30,7 +30,7 @@ function Testdata = Run_Simulation_DragA(ID_A,nlm)
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 10],ID_A.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 20],ID_A.D0,dDdt0,options);
     [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,0,nlm); 
     if nargin == 0 
     % run the twin test adimensional and check the residuum between the two

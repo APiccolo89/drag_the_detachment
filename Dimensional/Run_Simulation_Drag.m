@@ -27,7 +27,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark,nlm)
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system
-    [t,D,te,De,ie] = ode15i(Funf_wi,[0 10*ID.tc],ID.D0,dDdt0,options);
+    [t,D,te,De,ie] = ode15i(Funf_wi,[0 20*ID.tc],ID.D0,dDdt0,options);
 
     
     
