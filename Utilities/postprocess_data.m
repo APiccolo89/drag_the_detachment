@@ -1,0 +1,73 @@
+function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark,nlm)
+    % =====================================================================
+    % post process the data using the same function used to compute the raw
+    % results. 
+    %======================================================================
+    % Input:
+    % t   : time computed by the ODE i5 
+    % D   : thickness evolution with time
+    % ID  : Initial Data Structure
+    % Dim : 1 means dimensional, 0, means a-dimensional
+    %======================================================================
+    % Output: 
+    % Testdata : Data structure with the post process data. 
+    %======================================================================
+    % Alg: Compute dDdt using a simple diff (diff(D)/diff(t))
+    %      Compute the central point of D, t 
+    %      Post process the stress
+    %      Post process the strain 
+    %      Integrate the non dimensional data in the data structure 
+    %      Compute the detachment structure
+    %======================================================================
+    dDdt = (D(2:1:end)-D(1:end-1))./(t(2:1:end)-t(1:1:end-1));
+    D = 0.5*(D(1:1:end-1)+D(2:1:end));
+    t   = 0.5*(t(1:1:end-1)+t(2:1:end));
+
+    if Dim == 1
+        if nlm.islinear
+            [t_eff,t_B,t_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
+        else
+            [t_eff,t_B,t_D,ID,eta_um] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
+            Lambda = ((eta_um./((1/ID.eta0NS+1/(ID.eta0DS)))^-1)).*ID.len.*ID.alpha;
+        end
+        [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff,Benchmark); 
+        tau = [t_B,t_D,t_eff]./ID.s0;
+        eps = [eps_eff,eps_d,eps_n]./ID.ec;
+        Testdata.time   = t/ID.tc; %time vector divided by the detachment timescale 
+        Testdata.D_norm = D/ID.D0;
+        Testdata.t_det   = te/ID.tc;
+    elseif Dim == 0 
+        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,nlm);
+        [eps_eff,eps_d,eps_n] = Compute_StrainA(ID,t_eff); 
+        tau = [t_B,t_D,t_eff];
+        eps = [eps_eff,eps_d,eps_n];
+        Testdata.time   = t; %time vector divided by the detachment timescale 
+        Testdata.D_norm = D;
+        Testdata.t_det   = te;
+    end
+    Testdata.tau(1,:) = tau(:,1);
+    Testdata.tau(2,:) = tau(:,2);
+    Testdata.tau(3,:) = tau(:,3);
+    Testdata.eps(1,:) = eps(:,1);
+    Testdata.eps(2,:) = eps(:,2);
+    Testdata.eps(3,:) = eps(:,3);
+    % Find the max tau eff
+    t_t_max = max(Testdata.tau(3,:));
+    time_t_M = t(Testdata.tau(3,:)==t_t_max);
+    Testdata.t_t_max = t_t_max;
+    if Dim == 1
+        Testdata.time_t_M = time_t_M./ID.tc;
+    else
+        Testdata.time_t_M = time_t_M;
+    end
+    Testdata.t_t_det  = Testdata.tau(3,end);
+    if nlm.islinear == 0
+        Testdata.Lambda = Lambda; 
+        if Dim == 1
+            Testdata.eta_um  = eta_um;
+        end
+    else 
+        Testdata.Lambda = []; 
+        Testdata.etaum  = []; 
+    end
+end

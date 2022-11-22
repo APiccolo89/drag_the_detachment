@@ -4,7 +4,7 @@
 \title{0D numerical solution}
 \author{andreapiccolo89 }
 \date{September 2022}
-
+\usepackage{mathtools}
 \begin{document}
 
 \maketitle
@@ -115,11 +115,11 @@ where:
 The equation from which I would like to start the derivation is the following
 
 \begin{equation}
-    0 = -D^{*} l_c \left\{ (B_n^{*} \tau_c^{-n}{t_c}^{-1})  \left(\tau^{*}\tau_c\right)^n \left[ 1+ \left( \frac{\left(\tau^{*}\tau_c\right)}{\xi (\tau^{*}_{B,0}\tau_c)} \right)^{1-n} \right] \right\} -\left(\frac{dD^{*}}{dt^{*}}\frac{l_c}{t_c}\right)
+    0 = -D^{a} l_c \left\{ (B_n^{a} \tau_c^{-n}{t_c}^{-1})  \left(\tau^{a}\tau_c\right)^n \left[ 1+ \left( \frac{\left(\tau^{a}\tau_c\right)}{\xi (\tau^{a}_{B,0}\tau_c)} \right)^{1-n} \right] \right\} -\left(\frac{dD^{a}}{dt^{a}}\frac{l_c}{t_c}\right)
   \label{eq:Main_equation}
 \end{equation}
 
-Where $\tau^{*}= \tau/\tau_c$ represents the not dimensional effective stress. While $D^{*}$ represents the not dimensional thickness. 
+Where $\tau^{a}= \tau/\tau_c$ represents the not dimensional effective stress. While $D^{a}$ represents the not dimensional thickness. 
 \subsection{Characteristic value and additional relations}
 Now let's start defining additional and important relation and what I believe are the most important characteristic length: 
 \begin{align}
@@ -147,7 +147,7 @@ Then, we can tackle the problem represent by $\tau$ and introducing other useful
 
 \begin{align}
     \tau_B &= \frac{\tau_{B,0}D_0}{D} [Pa] \\
-    \tau_B^{*}&= \frac{D_0}{D} 
+    \tau_B^{a}&= \frac{D_0}{D} 
 \end{align}
 \subsection{Derivation of the effective stress}
 The basic equation are set up. In the following part I derive a definition for $\tau$, the effective stress \eqref{eq:effective_stress0}, using the relations in \eqref{eq:Drag_Force}.
@@ -169,9 +169,8 @@ then the equation for the effetive stress becomes
     \tau = \tau_{B,0} \frac{D_0}{D} \left( 1-\frac{\Psi L_0 \alpha}{2 s}\left(\frac{D_0}{D}\right)^2 \frac{dD}{dt}\left(\frac{dD}{dt}_c\right)^{-1}\right)
 \end{equation}
 which is properly not dimensionalized with $\tau_c = \tau_{B,0}$, and using additional characteristic value defined above: 
-
 \begin{equation}
-    \frac{\tau}{\tau_c} = \tau^{*}_{B} \left( 1-\frac{\Psi L_0 \alpha}{2s}\left({\tau^{*}_B}\right)^2 \frac{dD^{*}}{dt^{*}}\right)
+    \frac{\tau}{\tau_c} = \tau^{a}_{B} \left( 1-\frac{\Psi L_0 \alpha}{2 s}\left(\tau^{a}_B\right)^2 \frac{dD^{a}}{dt^{a}}\right)
     \label{eq:no_d_tau_eff}
 \end{equation}
 
@@ -184,37 +183,100 @@ Which represent adimensional group concerning the characteristic wavelegnth of d
 Yielding: 
 
 \begin{equation}
-    \frac{\tau}{\tau_c} = \tau^{*}_{B} \left( 1-\gamma \Psi {\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)
+    \frac{\tau}{\tau_c} = \tau^{a}_{B} \left( 1-\gamma \Psi \tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)
     \label{eq:no_d_tau_eff}
 \end{equation}
 or introducing $\Lambda= \gamma \Psi$: 
 
 \begin{equation}
-    \frac{\tau}{\tau_c} = \tau^{*}_{B} \left( 1-\Lambda {\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)
+    \frac{\tau}{\tau_c} = \tau^{a}_{B} \left( 1-\Lambda \tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)
     \label{eq:no_d_tau_eff}
 \end{equation}
 
 \section{Final equation}
 
 \begin{align}
-    0 &= -D^{*} \left\{B_n^{*}  \left(\tau^{*}\right)^n \left[ 1+ \left( \frac{\tau^{*}}{\xi} \right)^{1-n} \right] \right\} -\left(\frac{dD^{*}}{dt^{*}}\right)\\
-    &=-D^{*} \left\{B_n^{*}  \left(\tau^{*}_{B} \left( 1-\Lambda {\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)\right)^n \left[ 1+ \left( \frac{\tau^{*}_{B} \left( 1-\Lambda {\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)}{\xi} \right)^{1-n} \right] \right\} -{dD^{*}}{dt^{*}}
+    0 &= -D^{a} \left\{B_n^{a}  \left(\tau^{a}\right)^n \left[ 1+ \left( \frac{\tau^{a}}{\xi} \right)^{1-n} \right] \right\} -\left(\frac{dD^{a}}{dt^{a}}\right)\\
+    &=-D^{a} \left\{B_n^{a}  \left(\tau^{a}_{B} \left( 1-\Lambda \tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)\right)^n \left[ 1+ \left( \frac{\tau^{a}_{B} \left( 1-\Lambda \tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)}{\xi} \right)^{1-n} \right] \right\} -{dD^{a}}{dt^{a}}
   \label{eq:Main_equation}
 \end{align}
 since we define $\xi = \frac{1}{\sqrt[n-1]{\Xi}}$ which is equivalent to $\xi=\Xi^{\frac{1}{1-n}}$. Then $\frac{1}{\xi}=\frac{1}{\Xi^{\frac{1}{1-n}}}$ which allows to extract $\frac{1}{\Xi}$
 \begin{equation}
-    0 =-D^{*}\left\{B_n^{*}\left(\tau^{*}_{B} \left( 1- \Lambda {\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)\right)^n \left[ 1+ \frac{1}{\Xi}\left( \tau^{*}_{B} \left( 1-\Lambda{\tau^{*}_B}^2 \frac{dD^{*}}{dt^{*}}\right)\right)^{1-n} \right] \right\} -\frac{dD^{*}}{dt^{*}}
+    0 =-D^{a}\left\{B_n^{a}\left(\tau^{a}_{B} \left( 1- \Lambda \tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)\right)^n \left[ 1+ \frac{1}{\Xi}\left( \tau^{a}_{B} \left( 1-\Lambda\tau^{a}_B^2 \frac{dD^{a}}{dt^{a}}\right)\right)^{1-n} \right] \right\} -\frac{dD^{a}}{dt^{a}}
   \label{eq:Main_equation}
 \end{equation}
 
 \begin{align}
-    B_n^{*} &= \frac{B_n}{(\tau_{B,0})^{-n}\dot{\varepsilon}_c} && \tau^{*}_{B} &= \frac{\tau_{B}}{\tau_{B,0}} = \frac{D_0}{D}\\ 
-    D^{*} &= \frac{D}{D_0}  && \frac{dD^{*}}{dt} &= \frac{\frac{dD}{dt}}{D_0 \dot{\varepsilon}_c} \\
+    B_n^{a} &= \frac{B_n}{(\tau_{B,0})^{-n}\dot{\varepsilon}_c} && \tau^{a}_{B} &= \frac{\tau_{B}}{\tau_{B,0}} = \frac{D_0}{D}\\ 
+    D^{a} &= \frac{D}{D_0}  && \frac{dD^{a}}{dt} &= \frac{\frac{dD}{dt}}{D_0 \dot{\varepsilon}_c} \\
     \Lambda &= \gamma \Psi && \gamma &= \frac{L_0\alpha}{s} \\ 
     \Psi &= \frac{\eta^{UM}_{eff,0}}{\eta^{S}_{eff,0}} && \Xi &= \frac{\eta^{S}_{d,0}}{\eta^{S}_{d,0}}
 \end{align}
+
+\section{Non Linear Upper mantle equations }
+
+In the following part, I would like to start a derivation for integrating non linear upper mantle in the 0D numerical simulation. First the basic assumption is the following that the drag force acting on the slab is the same acting on the mantle. Second that the new form of the not dimensional equations is involving a $\Lambda(\tau)$. 
+
+I keep the same definition of reference viscosity. Moreover, the same scaling between $\eta_{0,D}=\xi\eta_{0,D}$. 
+
+At reference condition (i.e. $\tau = \tau_{0,B} = \tau_c$: 
+\begin{align}
+    \eta_{0,D} &= \xi \eta_{0,n}\\
+    \eta_{0,n} &= \frac{1}{\xi} \eta_{0,D}
+\end{align}
+Which imply: 
+\begin{align}
+    B_n        &= \frac{\tau_{0,B}^{1-n}}{2\eta_{0,n}}\\
+    B_n        &= \frac{\tau_{0,B}^{1-n}}{2\frac{1}{\xi}\eta_{0,D}}    
+\end{align}
+thus: 
+\begin{align}
+    \eta_{n} &= \frac{1}{2}\frac{1}{B_n}\tau^{1-n}\\
+    \eta_{n} &= \frac{1}{2}\frac{1}{\frac{\tau_{0,B}^{1-n}}{2\frac{1}{\xi}\eta_{0,D}} }\tau^{1-n}\\
+    \eta_{n} &= \frac{\frac{1}{\xi}\eta_{0,D}}{{\tau_{0,B}^{1-n}} }\tau^{1-n}\\
+    \eta_{n} &= \frac{1}{\xi}\eta_{0,D} \left(\frac{\tau}{\tau_{0,B}}\right)^{1-n}
+\end{align}
+Reducing the effective viscosity of the upper mantle: 
+\begin{align}
+    \eta_{eff} &= \left(\frac{1}{\eta_D}+\frac{1}{\eta_n}\right)^{-1}\\
+    \eta_{eff} &= \left(\frac{1}{\eta_{0,D}}+\frac{1}{\frac{1}{\xi}\eta_{0,D} \left(\frac{\tau}{\tau_{0,B}}\right)^{1-n}}\right)^{-1}\\
+    &= \left( \frac{\frac{1}{\xi}\eta_{0,D}\left(\frac{\tau_D}{\tau_{0,B}}\right)^{1-n}}{\frac{1}{\xi}\left(\frac{\tau_D}{\tau_{0,B}}\right)^{1-n}+1}\right)
+\end{align}
+
+if $\tau_D = 0.0$  the effective should be zero. But if i do the following trick: 
+
+\begin{align}
+    \eta_{eff} &= \left( \frac{\frac{1}{\xi}\eta_{0,D}\left(\frac{\tau_D}{\tau_{0,B}}\right)^{1-n}}{\frac{1}{\xi}\left(\frac{\tau_D}{\tau_{0,B}}\right)^{1-n}\left(1+ \xi\left( \frac{\tau_D}{\tau_{0,B}}\right)^{n-1}\right)}\right)\\
+    \eta_{eff} &= \left( \frac{\eta_{0,D}}{\left(1+ \xi\left( \frac{\tau_D}{\tau_{0,B}}\right)^{n-1}\right)}\right)
+\end{align}
+\begin{equation}
+ \eta_{eff}
+\begin{dcases}
+    \eta_{0,D} & \text{if } \frac{\tau_D}{\tau_{B,0}}=0.0\\
+   \frac{\eta_{D}}{1+\xi}& \text{if } \frac{\tau_D}{\tau_{B,0}}=1.0
+\end{dcases}
+\end{equation}
+Therefore, I can express the effective viscosity of the upper mantle with this simple and catchy equation:
+\begin{equation}
+    \eta^{UM}_{eff}=\frac{1}{1+\xi\left(\frac{\tau_D}{\tau_{0,B}}\right)^{n-1}}\eta_{0,D}
+\end{equation}
+This implies that the effective stress can be defined as: 
+\begin{align}
+    \tau_{eff} &=\tau_{0,B} \frac{D_0}{D}\left(1+\Psi\gamma\frac{D_0^2}{D^2} \frac{dD^{a}}{dt}\right)\\
+        &= \tau_{0,B} \frac{D_0}{D}\left(1+\frac{\frac{1}{1+\xi\left(\frac{\tau_D}{\tau_{0,B}}\right)^{n-1}}\eta^{UM}_{0,D}}{\eta^S_{0,n}}\gamma\frac{D_0^2}{D^2} \frac{dD^{a}}{dt}\right)\\
+        &= \tau_{0,B} \frac{D_0}{D}\left(1+\frac{\Psi_0\gamma}{1+\xi\left(\frac{\tau_D}{\tau_{0,B}}\right)^{n-1}}\frac{D_0^2}{D^2} \frac{dD^{a}}{dt}\right)\\
+        &= \tau_{0,B} \frac{D_0}{D}\left(1+\frac{\Lambda}{1+\xi\left(\frac{\tau_D}{\tau_{0,B}}\right)^{n-1}}\frac{D_0^2}{D^2} \frac{dD^{a}}{dt}\right)
+\end{align}
+
+
+
+
+
+
 
 
 
 
 \end{document}
+
+

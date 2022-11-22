@@ -60,7 +60,7 @@ function [res] = compute_dragODE(D,dDdt,ID)
     % and cast the problem of necking in term of optimization. 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Compute the effective stress 
-    [tau_eff] = compute_the_effective_stress(D,dDdt,ID);
+    [tau_eff] = compute_the_effective_stress(D,dDdt,ID,0);
     res = -D*(ID.B_n*(tau_eff)^n+ID.B_d*(tau_eff))-dDdt;
 end
 
