@@ -29,10 +29,10 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
     end
     if Dim == 1
         if non_linear_um == 0
-            [t_eff,t_B,t_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um);
+            [t_eff,t_B,t_D,ID] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
         else
-            [t_eff,t_B,t_D,ID,eta_um] = Compute_effective_StressD(D,dDdt,ID,Benchmark,non_linear_um);
-            Lambda = (eta_um./((1/ID.eta0+1/(ID.Df*ID.eta0)))^-1)*(ID.len*ID.alpha)/2;
+            [t_eff,t_B,t_D,ID,eta_um] = Compute_effective_StressD(D,dDdt,ID,Benchmark,nlm);
+            Lambda = ((eta_um/((1/ID.eta0NS+1/(ID.eta0DS)))^-1))*ID.len*ID.alpha;
 
         end
         [eps_eff,eps_d,eps_n] = Compute_StrainD(ID,t_eff,Benchmark); 
@@ -42,7 +42,7 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
         Testdata.D_norm = D/ID.D0;
         Testdata.t_det   = te/ID.tc;
     elseif Dim == 0 
-        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,1);
+        [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,non_linear_um);
         [eps_eff,eps_d,eps_n] = Compute_StrainA(ID,t_eff); 
         tau = [t_B,t_D,t_eff];
         eps = [eps_eff,eps_d,eps_n];
@@ -66,7 +66,11 @@ function [Testdata]=postprocess_data(t,D,ID,te,De,ie,Dim,Benchmark)
         Testdata.time_t_M = time_t_M;
     end
     Testdata.t_t_det  = Testdata.tau(3,end);
-    if non_linear_um == 1
+    if nlm.islinear == 0
         Testdata.Lambda = Lambda; 
+        Testdata.etaum  = etaum; 
+    else 
+        Testdata.Lambda = Lambda; 
+        Testdata.etaum  = etaum; 
     end
 end

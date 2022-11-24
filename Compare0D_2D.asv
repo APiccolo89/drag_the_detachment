@@ -135,10 +135,10 @@ end
     figure(4)
     scatter((L0/D0),fitting_p,"k",'filled')
     xlabel('$(\frac{L_0}{D_0})$',Interpreter='latex')
-    ylabel('$F /%$',Interpreter='latex')
+    ylabel('$%$',Interpreter='latex')
     grid on
     %set(gca, 'XScale', 'log')
-    pt=fullfile(pt,'SCATTERL0_FITP');
+    pt=fullfile(pt,'SCATTERL0_effectiveEXP');
     print(pt_save,'-dpng')
 
 

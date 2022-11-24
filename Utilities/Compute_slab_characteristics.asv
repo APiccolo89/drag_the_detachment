@@ -82,7 +82,7 @@ len        = l0/(2*s);                     % Length divided by a characteristic 
 Lambda     = len*alpha*Psi;             % Parameter derived by 2D numerical simulation
 B_n_um     = (s0^(1-n))/(2*eta0NM);
 
-string_ID = {'B_d','B_n','s0','n','eta0DS','eta0NS','Df_S','drho','D0','l0','eta0DM','eta0NM','tc','ec','Psi','Lambda','alpha','len','Df_UM','s','B_n_um'};
+string_ID = {'B_d','B_n','s0','n','eta0DS','eta0NS','Df_S','drho','D0','l0','eta0DM','eta0NM','tc','ec','Psi','Lambda','alpha','len','Df_UM','s','B_n_um','nlm'};
 if nargin == 0 || nargin == 1
     disp(['============================================================='])
     disp(['DIMENSIONAL       ==========================================='])
@@ -145,5 +145,4 @@ ID_A.etaS   = ((1/ID.eta0NS+1/(ID.eta0DS))^(-1))/(ID.s0*ID.tc);
 ID_A.B_n_um = ID.B_n_um/((ID.s0)^(-ID.n)*t_c^(-1)); 
 ID_A.eta0DM = ID.eta0DM/(ID.s0*ID.tc);
 ID_A.Df_UM  = ID.Df_UM;
-ID_A.fetch  = 1.0; 
 end

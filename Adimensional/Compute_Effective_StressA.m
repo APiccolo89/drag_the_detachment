@@ -31,10 +31,10 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
     % Drag force related stress compute formulation of Bercovici et al 2015 
 
     if nlm.islinear
-        tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt; 
+        tau_D = +ID_A.Lambda.*tau_B.^3.*dDdt.*ID_A.fetch; 
     else
         [tau_M,Lambda] = compute_drag_stressA(ID_A,D,dDdt); 
-        tau_D = Lambda.*tau_B.^3.*dDdt;
+        tau_D = Lambda.*tau_B.^3.*dDdt.*ID_A.fetch;
     end
     tau_eff = tau_B+tau_D;
 
