@@ -51,6 +51,9 @@ end
 % Compute the effective strain 
 eps_eff = eps_dif+eps_dis; 
 
+[eps_eff] = compute_effective_viscosity(tau_eff,ID,eps_eff);
+
+
 %Benchmark 
 % Small function that call the adimensional computation of strain rate and
 % uses the data coming from the computation of tau_eff and compare with
@@ -99,3 +102,14 @@ if nargin == 2
 end
     eps = B.*tau_eff.^n;    
 end
+function [eps_eff] = compute_effective_viscosity(tau_eff,ID,eps_eff)
+
+eta_eff = ID.eta0DS./(1+ID.Df_S.*tau_eff.^(ID.n-1));
+if eta_eff < ID.eta_CF
+    eps_eff = ID.B_D_C.*tau_eff; 
+else 
+    eps_eff = eps_eff; 
+end
+
+end
+

@@ -33,23 +33,25 @@ end
 tic
 n_tests = length(ium(:));
 disp(['Number of tests is ',num2str(n_tests)])
-WORK = 1; 
 for i=1:n_tests
     T_name   = strcat('T_',num2str(i));
     eta0DM   = ium(i);
     s0       = iut0(i);
     eta0DS   = iuet0(i);
     l0       = iuL0(i);
-    Df_S     = iuDfS(i);
-    Df_UM    = iuDfM(i);
+    xiUS     = iuDfS(i);
+    xiUM     = iuDfM(i);
     D0       = iuD0(i);
-    [Temp]   = Processing_simulation(eta0DS,Df_S,n,l0,s0,D0,eta0DM,Benchmark,Df_UM,nlm);
+    try
+        [Temp]   = Processing_simulation(eta0DS,xiUS,n,l0,s0,D0,eta0DM,Benchmark,xiUM,nlm);
+    catch 
+        disp([num2str(i),'out of',num2str(ntests), 'tests'])
+    end
     Tests.(T_name)=Temp;
-    percentages_test = (i/n_tests)*100;
-    disp([num2str(percentages_test,2),'per cent completed'])
+    
+    disp([num2str(i),'out of',num2str(n_tests), 'tests'])
 end
 toc
-bla=1.0;
 end
 
 
@@ -57,11 +59,11 @@ function [Temp]=Processing_simulation(eta0DS,Df_S,n,l0,s0,D0,eta0DM,Benchmark,Df
 
     [ID] = Compute_slab_characteristics(eta0DS,Df_S,n,l0,s0,D0,eta0DM,Df_UM,nlm);
     % Run a simulation with a specific combination of parameter
-    Testdata = Run_Simulation_Drag(ID,Benchmark,nlm);
-    Testdata_a = Run_Simulation_DragA(ID.ID_A,nlm);
+    %Testdata = Run_Simulation_Drag(ID,Benchmark,nlm);
+    Testdata = Run_Simulation_DragA(ID.ID_A,nlm);
     %interpolation routine from AD->D
     Temp = Testdata;
-    Temp.Testdata_a=Testdata_a;
+    Temp=Testdata;
     Temp.initial_data = ID;
     ID = [];
     Testdata = [];

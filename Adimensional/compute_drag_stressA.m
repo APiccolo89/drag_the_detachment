@@ -83,7 +83,7 @@ function [Lambda,tau_M] = compute_drag_stress_etaA(ID,dDdt,D)
 %======================================================================
 % Prepare the initial value
 % compute the initial strain rate
-eps_A = abs((ID.alpha/ID.L0)*(ID.D0/D)^2*dDdt);
+eps_A = abs((ID.alpha/ID.s)*(ID.D0/D)^2*dDdt);
 eta_n = (2*ID.B_n_um^(1/ID.n)*eps_A^((ID.n-1)/ID.n))^(-1);
 eta_eff_g =(1/ID.eta0DM+1/eta_n)^-1;
 % Compute the new initial guess Lambda

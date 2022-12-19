@@ -11,14 +11,14 @@ clear all
 close all
 
 % Reference values: 
-Tp    = 1350+273.15; 
+Tp    = 1250+273.15; 
 Pr    = 3300*100e3*9.81; 
 t0    = 100e6;
-Vnv   = [15e-6:1e-6:20e-6];
+Vnv   = [10e-6:1e-6:20e-6];
 Vdv   = [5e-6];
 age   = 10; 
 D0 = 80e3;
-L0 = [0:10:600].*1e3;
+L0 = [1,300,500,600].*1e3;
 % Dry Olivine Data: 
 [eta0DMP,eta0MP,eta0DSP,eta0SP] =  main_function(t0, age, Tp, Pr,D0,L0,Vnv,Vdv);
 
@@ -30,12 +30,14 @@ eta0DMP = (MMV./MMV).*0.0;
 eta0MP  = (MMV./MMV).*0.0;
 eta0DSP = (MMV./MMV).*0.0;
 eta0SP  = (MMV./MMV).*0.0;
+xiumP   = (MMV./MMV).*0.0;
+xium0   = (MMV./MMV).*0.0;
 
 for i=1:length(MMV(:))
     l0 = MML0(i);
     Vn = MMV(i);
 
-    [eta0DMP(i), eta0MP(i), eta0DSP(i), eta0SP(i)] = compute_effective_viscosities(t0,D0,l0,Vn,Vdv,Tp,Pr,age);
+    [eta0DMP(i), eta0MP(i), eta0DSP(i), eta0SP(i),xiumP(i),xium0(i)] = compute_effective_viscosities(t0,D0,l0,Vn,Vdv,Tp,Pr,age);
 
 
 
@@ -57,7 +59,7 @@ contourf(MMV,MML0./1e3,log10(eta_eff_M),20);colorbar; shading interp; colormap(c
 
 
 end 
-function [eta0MDP,eta0MP,eta0DSP,eta0SP] = compute_effective_viscosities(t0,D0,L0,Vn,Vd,Tp,Pr,age)  
+function [eta0MDP,eta0MP,eta0DSP,eta0SP,xium_P,xium_0] = compute_effective_viscosities(t0,D0,L0,Vn,Vd,Tp,Pr,age)  
  
 % Constants
 rho  = 3300; 
@@ -91,11 +93,11 @@ Tavg =  compute_average_T_slab(D0,age,Tp);
 eta0S = compute_reference_viscosity(Bn,En,Vn,n,Tavg,Pr,t0,R);
 eta0DS = compute_reference_viscosity(Bd,Ed,Vd,1,Tavg,Pr,t0,R);
 xiuS_0 = eta0DS/eta0S; 
-disp('=====================================================================')
-disp(['Reference viscosity Slab at T = ' num2str(Tavg), 'K, and at P = ',num2str(Pr/1e9,2), ' GPa and at tau0 = ' num2str(t0), 'MPa is:'])
-disp(['log10(eta0) = ',num2str(log10(eta0S),4)])
-disp(['log10(eta0D) = ', num2str(log10(eta0DS),4)])
-disp('=====================================================================')
+% disp('=====================================================================')
+% disp(['Reference viscosity Slab at T = ' num2str(Tavg), 'K, and at P = ',num2str(Pr/1e9,2), ' GPa and at tau0 = ' num2str(t0), 'MPa is:'])
+% disp(['log10(eta0) = ',num2str(log10(eta0S),4)])
+% disp(['log10(eta0D) = ', num2str(log10(eta0DS),4)])
+% disp('=====================================================================')
 % Compute integral Upper mantle 
 Exn = @(x) compute_exponential(Cn,x,phi,3300*g);
 Exd = @(x) compute_exponential(Cd,x,phi,3300*g);
@@ -104,6 +106,9 @@ intexd = (integral(Exd,0,L0))./L0;
 eta0MP = eta0M*intexn;
 eta0MDP = eta0DM*intexd; 
 xium_P = eta0MDP/eta0MP; 
+if isnan(xium_P)
+bla = 0; 
+end
 disp('=====================================================================')
 disp(['Average reference viscosity UM integrated along the slab = '])
 disp(['log10(eta0) = ',num2str(log10(eta0MP),4)])

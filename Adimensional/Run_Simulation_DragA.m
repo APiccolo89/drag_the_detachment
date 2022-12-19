@@ -28,7 +28,7 @@ function Testdata = Run_Simulation_DragA(ID_A,nlm)
     % Create function handle 
     Funf_wi = @(t,x,xp0) compute_dragODEA(x,xp0,ID_A,nlm);
     % Set the option for resolving the system of equation
-    options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
+    options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 20],ID_A.D0,dDdt0,options);
     [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,0,nlm); 

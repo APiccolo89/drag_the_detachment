@@ -1,5 +1,5 @@
 
-function plot_results(Tests,name,ptsave)
+function plot_results(Tests,name,ptsave,nlm)
     % Input 
     % Testdata=> Data Structure containing all the tests 
     % Short description
@@ -8,56 +8,17 @@ function plot_results(Tests,name,ptsave)
     % Plot td against Lambda scatter plot.
     % Stress => To Do How to retrieve the stress data per each timestep 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    [Data_S] = extract_information_detachment(Tests,0,nlm);
     % function plot not dimensional data {+ additional collect data for the scatter plot
     % i.e. Lambda, t_d,Psi} 
-    [Data_S] =  Plot_1D_Plots(Tests,name,ptsave);
+    Plot_1D_Plots(Tests,Data_S,name,ptsave,nlm);
     % function to do scatter plot
-    plot_scatter(Data_S,name,ptsave,'t_det');
-    plot_scatter(Data_S,name,ptsave,'t_det_error');
-    plot_scatter(Data_S,name,ptsave,'error_gl');
-    plot_scatter(Data_S,name,ptsave,'tau_ii');
-    plot_scatter(Data_S,name,ptsave,'time_max-time det');
-
-
-
+    %plot_scatter(Data_S,name,ptsave,'t_det',nlm)
+    %plot_scatter(Data_S,name,ptsave,'time_max-time det',nlm)
+    
 end
 
-function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
-
-    % Collect the field names 
-    fn = fieldnames(Tests);
-    % number of test 
-    itest = length(fn);
-    % Prepare Data_S array
-    Data_S = zeros(10,itest); 
-    i = 1;
-    for k = 1:numel(fn) 
-     
-       TD = Tests.(fn{k});
-       
-       Data_S(1,i) = TD.initial_data.Lambda;
-       Data_S(2,i) = log10(TD.initial_data.Psi); 
-       if ~isempty(TD.t_det) && isreal(TD.D_norm)
-        Data_S(3,i) = TD.initial_data.n*TD.t_det;
-        Data_S(4,i) = TD.t_t_max;
-        Data_S(5,i) = TD.time_t_M*TD.initial_data.n;
-        Data_S(6,i) = TD.t_t_det;
-        Data_S(7,i) = abs(TD.t_det-TD.Testdata_a.t_det);
-        Data_S(10,i) = 1.0 ; 
-       else
-        Data_S(3,i) = nan;
-        Data_S(4,i) = nan;
-        Data_S(5,i) = nan;
-        Data_S(6,i) = nan;
-        Data_S(7,i) = nan;
-        Data_S(10,i) = -1.0 ; 
-       end 
-       Data_S(8,i) = TD.initial_data.Df_S;
-       Data_S(9,i) = TD.initial_data.D0/TD.initial_data.l0;
-       i = i+1
-    end
-
+function [Data_S] = Plot_1D_Plots(Tests,Data_S,name,ptsave,pb)
     tic
     plot1D_setExp(Tests,Data_S,name,'D_norm',ptsave)
     toc
@@ -70,23 +31,25 @@ function [Data_S] = Plot_1D_Plots(Tests,name,ptsave)
     tic
     plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave)
     toc
-    plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave)
-    tic
-    plot1D_setExp(Tests,Data_S,name,'Exp',ptsave)
-    toc
-
+    if pb.islinear == 0
+        plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave)
+        tic
+    end
 end
 
-function plot_scatter(Data_S,name,ptsave,field) 
-c = Data_S(2,:);
+function plot_scatter(Data_S,name,ptsave,field,nlm) 
+c = Data_S(9,:);
 double = 0; 
 figure(1)
 
 if strcmp(field,'t_det')
     x = Data_S(1,:);
-    y = Data_S(3,:);
-    ylabel_ = ('$\frac{t}{t_d}$ [n.d]');
-    ylim_=[1,10];
+    if nlm.islinear ==0
+        x = x./(Data_S(13,:));
+    end
+    y = 1.0./Data_S(3,:);
+    ylabel_ = ('$\frac{n}{t^{det}_c}$ [n.d]');
+    ylim_=[0,0.0];
     fin = 'Global_test1DS_time_det';
 elseif strcmp(field,'tau_ii')
     x = Data_S(1,:);
@@ -100,15 +63,15 @@ elseif strcmp(field,'tau_ii')
 elseif strcmp(field,'time_max-time det')
     x = Data_S(1,:);
     y = Data_S(3,:)-Data_S(5,:);
-    ylabel_=('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$')
+    ylabel_=('$t_{det}-t(\tau_{eff}^{MAX}) [n.d.]$');
     fin = 'Global_test1DS_dT';
-    ylim_ = [0,0]
+    ylim_ = [0,0];
 elseif strcmp(field,'t_det_error')
     x = Data_S(1,:);
     y = Data_S(7,:);
     ylabel_ =('t^D_{det}-t^A_{det} [n.d.]');
     fin = 'Global_test1_error';
-    ylim_ = [0,0]
+    ylim_ = [0,0];
 
 
 elseif strcmp(field,'error_gl')
@@ -122,12 +85,11 @@ elseif strcmp(field,'error_gl')
 end
 s = 1;%Data_S(9,:);
 
-scatter(x(Data_S(8,:)==0.5),y(Data_S(8,:)==0.5),10,"black",'filled','d')
+%scatter(x(Data_S(8,:)==0.5),y(Data_S(8,:)==0.5),10,"black",'filled','d')
 
 hold on 
-scatter(x(Data_S(8,:)==1.0),y(Data_S(8,:)==1.0),20,"black",'filled','o')
-scatter(x(Data_S(8,:)==10.0),y(Data_S(8,:)==10.0),30,"black",'+')
-legend({'$ \xi = 0.1 $','$ \xi = 1.0$','$ \xi = 10.0 $'},'Interpreter','latex');
+scatter(x(Data_S(8,:)==100.0),y(Data_S(8,:)==100.0),10,c,'filled','o')
+
 
 %if double >0 
  %   scatter(x,y2,5,c,'filled','o','MarkerEdgeColor','k','LineWidth',0.5)
@@ -144,13 +106,14 @@ c=colorbar;
 c.Label.String = 'log10(\Psi) [n.d.]';
 grid on
 box on
-xlabel('$log_{10}(\Lambda)$[n.d.]',Interpreter='latex')
+xlabel('$log_{10}(\frac{\Lambda}{\xi^{UM}})$[n.d.]',Interpreter='latex')
 ylabel(ylabel_,Interpreter='latex')
 if ylim_(2) == 0
     disp('none')
 else
     ylim(ylim_);
 end
+xlim([10^(-8),1])
 %ylabel('t^O_d/t^P_d [n.d]')
 set(gca, 'XScale', 'log')
 xlim([10^(-7.3),10^(0)])
@@ -172,8 +135,8 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     % Collect the field names 
     fn = fieldnames(Tests);
     % Set the min and max of lambda value for the coloring of the plot
-    z_min =  round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
-    z_max = round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
+    z_min = -8;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = 0; %round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
     % See if the user installed Crameri cmap utilities, otherwise punish
     % him with jet colormap by default
     % Shamelessly copied from 
@@ -194,7 +157,7 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     end
 
     try
-        cmap = colormap(crameri('hawaii'));
+        cmap = colormap(crameri('broc'));
     catch
         cmap = colormap('jet');
     end
@@ -219,7 +182,7 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     i = 1; % iterator 
     for k = 1:numel(fn) 
        TD = Tests.(fn{k});
-       if Data_S(10,i) > 0.0
+       if ~isnan(Data_S.tdet)
            if VAL == 0 
                buf = TD.D_norm; 
                ylim([0.1,1.0])
@@ -268,7 +231,7 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
                xlim([0.1,1.0])
                xlabel('$\frac{D}{D_0} [n.d.]$','Interpreter','latex')
            end
-           plot(x,buf,'Color',C,LineWidth=1.3)
+           plot(x,buf,'Color',C,LineWidth=0.8)
            grid on 
        end        
        i = i+1; 

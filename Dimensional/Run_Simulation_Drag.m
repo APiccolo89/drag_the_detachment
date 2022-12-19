@@ -16,6 +16,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark,nlm)
     if(nargin==0)
         addpath ../Adimensional/
         Benchmark = 1;  
+        nlm = Problem_type.Linear;
         ID = Compute_slab_characteristics(NaN);
     end
     
@@ -23,7 +24,7 @@ function Testdata = Run_Simulation_Drag(ID,Benchmark,nlm)
     % 1) Assuming that drag force is not active
     dDdt0 = -(ID.tc)^(-1)*ID.D0;
     % Create function handle 
-    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,0,nlm);
+    Funf_wi = @(t,x,xp0) compute_dragODE(x,xp0,ID,1,nlm);
     % Set the option for resolving the system of equation
     options = odeset('RelTol',1e-12,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID));
     % resolve the system

@@ -36,7 +36,7 @@ if nargin == 0 || nargin == 1 %default value for the unit test:
         Df_UM = 10.0;
     else
         nlm = Problem_type.Linear;
-        Df_UM = NaN;
+        Df_UM = 0.0;
     end
     % print the default value used for testing and all the other
     % parameters:
@@ -70,17 +70,20 @@ else
 end 
 drho       = 2*s0/(9.81*l0);     % delta rho
 B_n        = s0^(1-n)/eta0NS;       % compliance dislocation
-B_d        = 1/(eta0DS);         % compliance diffusion
+B_d        = 1/(2.*eta0DS);         % compliance diffusion
 ec         = (B_n*s0^n+B_d*s0);   % characteristic strain rate
 tc         = 1/ec             ;   % characteristic time scale
 etaS_eff   = (1/eta0NS+1/(eta0DS))^(-1); % effective viscosity of the slab at reference condition
 Psi        = eta0DM/etaS_eff;    % ratio between the upper mantle viscosity and the slab viscosity
 % Alpha
 alpha      = 5.0;               % Ancient parameter derived by Yanick et al. 1986
-s          = l0;                    
+s          = 1000e3;%1000e3*1.5;                    
 len        = l0/(2*s);                     % Length divided by a characteristic lenght scale (i.e. size of my model)
 Lambda     = len*alpha*Psi;             % Parameter derived by 2D numerical simulation
 B_n_um     = (s0^(1-n))/(2*eta0NM);
+ID.eta_CF = 1e18; % switch to 1.0 when the use wants to not deal with it. 
+ID.B_D_C      = 1./(2.*ID.eta_CF);
+ID.nlm  = nlm;
 
 string_ID = {'B_d','B_n','s0','n','eta0DS','eta0NS','Df_S','drho','D0','l0','eta0DM','eta0NM','tc','ec','Psi','Lambda','alpha','len','Df_UM','s','B_n_um'};
 if nargin == 0 || nargin == 1
@@ -106,6 +109,7 @@ if nargin == 0 || nargin == 1
         disp(['    ',str])
     end
     disp(['============================================================='])
+ID.ID_A.nlm       = nlm; 
 
 end
 
@@ -121,6 +125,7 @@ D0  = 1.0;
 tau_B0 = 1.0; 
 B_d   = ID.B_d/((ID.s0*t_c)^(-1));
 B_n   = ID.B_n/((ID.s0)^(-ID.n)*t_c^(-1)); 
+B_dC  = ID.B_D_C/((ID.s0*t_c)^(-1));
 Lambda = ID.Lambda;
 % compute dDdt using dimensional value; 
 dDdtBDC = ID.D0*(ID.B_d*ID.s0+ID.B_n*(ID.s0)^ID.n); 
@@ -144,6 +149,13 @@ ID_A.Lambda = Lambda;
 ID_A.etaS   = ((1/ID.eta0NS+1/(ID.eta0DS))^(-1))/(ID.s0*ID.tc);
 ID_A.B_n_um = ID.B_n_um/((ID.s0)^(-ID.n)*t_c^(-1)); 
 ID_A.eta0DM = ID.eta0DM/(ID.s0*ID.tc);
+ID_A.eta_CF = ID.eta_CF/(ID.s0*ID.tc);
 ID_A.Df_UM  = ID.Df_UM;
-ID_A.fetch  = 1.0; 
+ID_A.Df_S   = ID.Df_S; 
+ID_A.B_D_C = B_dC; 
+ID_A.eta0DS = ID.eta0DS./(ID.s0*ID.tc);
+ID_A.fetch(1)  = 0.0; 
+ID_A.fetch(2)  = 1.0; 
+
+
 end
