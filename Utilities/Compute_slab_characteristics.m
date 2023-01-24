@@ -84,7 +84,8 @@ B_n_um     = (s0^(1-n))/(2*eta0NM);
 ID.eta_CF = 1e18; % switch to 1.0 when the use wants to not deal with it. 
 ID.B_D_C      = 1./(2.*ID.eta_CF);
 ID.nlm  = nlm;
-
+ID.cut_off_Slab = 0.0; 
+ID.cut_off_Mantle = 0.0; 
 string_ID = {'B_d','B_n','s0','n','eta0DS','eta0NS','Df_S','drho','D0','l0','eta0DM','eta0NM','tc','ec','Psi','Lambda','alpha','len','Df_UM','s','B_n_um'};
 if nargin == 0 || nargin == 1
     disp(['============================================================='])
@@ -156,6 +157,7 @@ ID_A.B_D_C = B_dC;
 ID_A.eta0DS = ID.eta0DS./(ID.s0*ID.tc);
 ID_A.fetch(1)  = 0.0; 
 ID_A.fetch(2)  = 1.0; 
-
+ID_A.cut_off_Slab = 0.0; 
+ID_A.cut_off_Mantle = 0.0; 
 
 end

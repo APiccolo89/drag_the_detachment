@@ -20,19 +20,24 @@ end
 
 function [Data_S] = Plot_1D_Plots(Tests,Data_S,name,ptsave,pb)
     tic
-    plot1D_setExp(Tests,Data_S,name,'D_norm',ptsave)
+    plot1D_setExp(Tests,Data_S,name,'D_norm',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'tau_eff',ptsave)
+    plot1D_setExp(Tests,Data_S,name,'tau_eff',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'tau_D_tau_B',ptsave)
+    plot1D_setExp(Tests,Data_S,name,'tau_D_tau_B',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave)
+    plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave,pb)
+    toc
+    tic
+    plot1D_setExp(Tests,Data_S,name,'dDdt_tauD',ptsave,pb)
     toc
     if pb.islinear == 0
-        plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave)
+        plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave,pb)
+        plot1D_setExp(Tests,Data_S,name,'eta_mantle',ptsave,pb)
+
         tic
     end
 end
@@ -130,12 +135,12 @@ clf;
 close;
 
 end 
-function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
+function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
     figure(1)
     % Collect the field names 
     fn = fieldnames(Tests);
     % Set the min and max of lambda value for the coloring of the plot
-    z_min = -8;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_min = -6;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
     z_max = 0; %round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
     % See if the user installed Crameri cmap utilities, otherwise punish
     % him with jet colormap by default
@@ -152,6 +157,10 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
         VAL = 3.0;
     elseif strcmp(field,'Lambda')
         VAL =4.0;
+    elseif strcmp(field,'eta_mantle')
+        VAL = -4.0; 
+    elseif strcmp (field,'dDdt_tauD')
+        VAL = 6.0; 
     else 
         VAL = 5; 
     end
@@ -182,7 +191,7 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     i = 1; % iterator 
     for k = 1:numel(fn) 
        TD = Tests.(fn{k});
-       if ~isnan(Data_S.tdet)
+       if ~isnan(Data_S.tdet(k))
            if VAL == 0 
                buf = TD.D_norm; 
                ylim([0.1,1.0])
@@ -201,9 +210,18 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
                
                set(gca, 'YScale', 'log')
            elseif VAL == 4
-               buf = (TD.Lambda);
+               buf = (TD.Lambda)./(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM));
                ylabel('$ \Lambda(t) [n.d.]$','interpreter','latex')
+               %set(gca, 'YScale', 'log')
+           elseif VAL==-4.0
+               buf = (TD.Lambda./TD.initial_data.Lambda).*TD.initial_data.eta0DM;
+               ylabel('$ \eta^{UM}_{eff}(t) [n.d.]$','interpreter','latex')
                set(gca, 'YScale', 'log')
+
+           elseif VAL==6 
+               buf = (-TD.tau(2,:)./TD.tau(1,:));
+               buf = (buf(1:1:end-1)+buf(2:1:end))/2; 
+
            else 
                 
     
@@ -211,7 +229,11 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
     
            % Normalize Lambda value w.r.t. the limit that I assumed to be
            % likely
-           V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
+           if nlm.islinear ==0 
+              V = (log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM))-z_min)/(z_max-z_min);
+           else
+              V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
+           end
            if V<0 
                V=0;
            elseif V>1
@@ -227,9 +249,13 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave)
 
                xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
            else
-               x = TD.D_norm;
-               xlim([0.1,1.0])
-               xlabel('$\frac{D}{D_0} [n.d.]$','Interpreter','latex')
+               dD = TD.D_norm; 
+               dD = dD(2:1:end)-dD(1:1:end-1);
+               x = TD.time*TD.initial_data.n; 
+               x = x(2:1:end)-x(1:1:end-1);
+               x = dD./x; 
+               %xlim([0.1,1.0])
+               xlabel('$\frac{dD}{dt} [n.d.]$','Interpreter','latex')
            end
            plot(x,buf,'Color',C,LineWidth=0.8)
            grid on 

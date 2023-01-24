@@ -54,8 +54,9 @@ eps_eff = eps_dif+eps_dis;
 %compute the effective viscosity of the slab and check if it is higher or
 %lower than the cut off 
 
-
-[eps_eff] = compute_effective_viscosity(tau_eff,ID,eps_eff);
+if ID.cut_off_Slab >0.0
+    [eps_eff] = compute_effective_viscosity(tau_eff,ID,eps_eff);
+end
 
 end
 

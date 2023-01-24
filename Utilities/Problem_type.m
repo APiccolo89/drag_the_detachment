@@ -1,7 +1,6 @@
 classdef Problem_type
     %PROBLEM_TYPE Class that describe if the problem is linear or non
     %linear upper mantle. 
-    
    enumeration
       Linear, NonLinear
    end

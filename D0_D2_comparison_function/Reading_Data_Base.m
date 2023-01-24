@@ -1,4 +1,4 @@
-function [P_Var,D,t,Tau,d,tdet] = Reading_Data_Base(Test_name,DB_path,Df_S)
+function [P_Var,D,t,Tau,d,tdet,topo,tauL] = Reading_Data_Base(Test_name,DB_path,Df_S,nlm)
 %==========================================================================
 % Function to read h5 file data.
 % Input : Test Name, Data base path
@@ -19,17 +19,27 @@ path_L0 = strcat(Test_name,'/Initial_Data/Initial_Condition/L0');
 path_tc = strcat(Test_name,'/Initial_Data/Initial_Condition/tc');
 path_s0 = strcat(Test_name,'/Initial_Data/Initial_Condition/tau0');
 path_eta0DS = strcat(Test_name,'/Initial_Data/Initial_Condition/eta0');
+if nlm.islinear == 0
+    path_eta0M = strcat(Test_name,'/Initial_Data/Initial_Condition/Astenosphere/eta0');
+end
 path_eta0DM = strcat(Test_name,'/Initial_Data/Initial_Condition/Astenosphere/eta');
-path_tzz = strcat(Test_name,'/TimeEvolution/Slab1D/tauzz');
-path_txx = strcat(Test_name,'/TimeEvolution/Slab1D/tauxx');
-path_txz = strcat(Test_name,'/TimeEvolution/Slab1D/tauxz');%/Viscous/High_Resolution_NLM/T_I0_VA20_V22_LM1_NE/Detachment/det_vec/
+path_tau = strcat(Test_name,'/TimeEvolution/Slab1D/tau');
 path_depth = strcat(Test_name,'/Detachment/det_vec/Depth');
 path_time_det = strcat(Test_name,'/Detachment/det_vec/t_det_td');
+path_topo     = strcat(Test_name,"/TimeEvolution/Free_Surface_Time/Amplitude");
+path_tauL     = strcat(Test_name,"/TimeEvolution/Whole_Lithosphere/tauii");
+
 P_Var.L0 = h5read(DB_path,path_L0)*1e3;
 P_Var.tc =  h5read(DB_path,path_tc);
 P_Var.s0 =  h5read(DB_path,path_s0)*1e6;
 P_Var.eta0DS = Df_S*h5read(DB_path,path_eta0DS);
 P_Var.eta0DM = h5read(DB_path,path_eta0DM);
+P_Var.xiUM   =NaN;
+if nlm.islinear == 0
+    P_Var.eta0M = h5read(DB_path,path_eta0M);
+    P_Var.xiUM   = P_Var.eta0DM./P_Var.eta0M; 
+    disp(['xium is ', num2str(P_Var.xiUM)])
+end
 
 
 disp('=====================================================================')
@@ -57,6 +67,8 @@ if P_Var.failed == 1
     Tau = [];
     d  = [];
     tdet = []; 
+    topo = []; 
+    tauL= []; 
 else
     tdet   =  h5read(DB_path,path_time_det);
 
@@ -65,11 +77,13 @@ else
     D=D./D(1);
     t= h5read(DB_path,path_t);
     t = t./P_Var.tc;
-    tau_zz = h5read(DB_path,path_tzz);
-    tau_xx = h5read(DB_path,path_txx); 
-    tau_xz = h5read(DB_path,path_txz);
-    Tau = [tau_zz(2),tau_xx(2),tau_xz(2)]./(P_Var.s0./1e6);
+    tau = h5read(DB_path,path_tau);
+
+    Tau = tau./(P_Var.s0./1e6);
     d = (h5read(DB_path,path_depth)+100)./(P_Var.L0/1000); 
+    topo_1  = h5read(DB_path,path_topo);
+    topo    = mean(topo_1,2);
+    tauL    = h5read(DB_path,path_tauL)./(P_Var.s0./1e6);
         
 end
 

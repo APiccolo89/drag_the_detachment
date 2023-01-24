@@ -9,155 +9,222 @@
 %=========================================================================%
 clear all
 close all
+addpath Realistic_Case/
 
 % Reference values: 
 Tp    = 1250+273.15; 
 Pr    = 3300*100e3*9.81; 
-t0    = 100e6;
-Vnv   = [10e-6:1e-6:20e-6];
-Vdv   = [5e-6];
-age   = 10; 
+t0    = 50e6;
+Vnv   = [0e-6:1e-6:20e-6];
+Vdv   = 5e-6; 
+T_mean   = [700:100:1300]; 
 D0 = 80e3;
-L0 = [1,300,500,600].*1e3;
+L0 = [1:10:600].*1e3;
+%Cn = (En*phi-Vnv*(1-phi*Pr))/(R*Tp);
+%Cd = (Ed*phi-Vd*(1-phi*Pr))/(R*Tp);
+UM = Mantle_Unit_Properties(3300,3e-5,1050,1.5e-9,6.22254e-16,375e3,530e3,3.5);
+S         = Mantle_Unit_Properties(3360,3e-5,1050,1.5e-9,6.22254e-16,375e3,530e3,3.5);
 % Dry Olivine Data: 
-[eta0DMP,eta0MP,eta0DSP,eta0SP] =  main_function(t0, age, Tp, Pr,D0,L0,Vnv,Vdv);
+[UPPER_MANTLE,SLAB] =  main_function_Real(t0, T_mean, Tp,Pr, D0,L0,Vnv,Vdv,UM,S);
+l10xium = squeeze(UPPER_MANTLE.xiumP(1,:,:));
+%% Figure Upper Mantle 
+% Prepare data: 
+% Lambda0 = (1+xiS)eta0DM/(1+xium)eta0DS*gamma 
+%
+gamma  = (L0*5)/(2000);
+T_plot   = 900; 
+t_c      = SLAB.eta0DS(10,:)./100e6;
 
+F1=figure(1)
+% plot xium vs L0 @ constant vd 
+    % Collect the field names 
+    % Set the min and max of lambda value for the coloring of the plot
+    z_min = min(Vnv);  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = max(Vnv);  %log10(max(Data_S(1,:)));
+    % See if the user installed Crameri cmap utilities, otherwise punish
+    % him with jet colormap by default
+    % Shamelessly copied from 
+    % https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+    
+    try
+        cmap = colormap(crameri('broc'));
+    catch
+        cmap = colormap('jet');
+    end
+    % Set colorbar
+    % Set colorbar
+   
+    for i = 1:length(Vnv)
+         c=colorbar;
+    c.Label.String = 'V_a []';
+    % Define coloraxis
+    caxis([z_min z_max])
+    % min/max are rounded using the log values of Lambda
+    val = (z_max-z_min)/10;
+    val2 = z_min:val:z_max;
 
-function [eta0DMP,eta0MP,eta0DSP,eta0SP] = main_function(t0, age, Tp,Pr, D0,L0,Vnv,Vdv)
+    Ticks=val2;
+    % Produce the tick
+    TickLabels=arrayfun(@(x) sprintf('{%0.4g}',x),Ticks,'UniformOutput',false);
+    try
+        set(c,'Ticks',Ticks);
+        set(c,'TickLabels',TickLabels);
+    catch %HG1
+        TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+        set(c,'YTick',Ticks);
+        set(c,'YTickLabel',TickLabels);
+    end
+         V = (Vnv(i)-z_min)/(z_max-z_min);
+        if V<0 
+              V=0;
+        elseif V>1
+          V=1;
+        end
+        V=round(1+V*(size(cmap,1)-1));%round to nearest index
+        C = cmap(V,:);
+        hold on
+        plot(L0/1000, l10xium(i,:),"Color",C)
+        set(gca, 'YScale', 'log')
+        xlabel('$L_0 [km]$',Interpreter='latex')
+        ylabel('$\xi^{UM} [n.d.]$',Interpreter='latex')
+        title('$\bar{\xi}^{UM}, T_P = 1250 [^\circ C], Vd = 5e-6$',Interpreter='latex')
 
-[MMV,MML0]  = meshgrid(Vnv,L0);
-eta0DMP = (MMV./MMV).*0.0;
-eta0MP  = (MMV./MMV).*0.0;
-eta0DSP = (MMV./MMV).*0.0;
-eta0SP  = (MMV./MMV).*0.0;
-xiumP   = (MMV./MMV).*0.0;
-xium0   = (MMV./MMV).*0.0;
+    end
+    hold off
+    box on
+    grid on
+    
 
-for i=1:length(MMV(:))
-    l0 = MML0(i);
-    Vn = MMV(i);
-
-    [eta0DMP(i), eta0MP(i), eta0DSP(i), eta0SP(i),xiumP(i),xium0(i)] = compute_effective_viscosities(t0,D0,l0,Vn,Vdv,Tp,Pr,age);
-
-
-
-end
-bla = 0
-figure(1)
-contourf(MMV,MML0./1e3,log10(eta0DMP./eta0MP),5);colorbar; shading interp; colormap(crameri('nuuk',20));
-
-
-figure(2)
-La_0 = (MML0.*5.0)./(2*1e3);
-xiS  = eta0DSP./eta0SP; 
-Lambda_0 = ((1+xiS).*eta0DMP)./(eta0DSP);
-Lambda_0(log10(Lambda_0)>0)=NaN; 
-contourf(MMV,MML0./1e3,log10(Lambda_0),20);colorbar; shading interp; colormap(crameri('nuuk',20));
-figure(3)
-eta_eff_M  = 1./(1./eta0MP);%+1./eta0MP);
-contourf(MMV,MML0./1e3,log10(eta_eff_M),20);colorbar; shading interp; colormap(crameri('nuuk',20));
-
-
-end 
-function [eta0MDP,eta0MP,eta0DSP,eta0SP,xium_P,xium_0] = compute_effective_viscosities(t0,D0,L0,Vn,Vd,Tp,Pr,age)  
- 
-% Constants
-rho  = 3300; 
-drho = (t0*2)/(9.81*L0);
-alpha = 3e-5; 
-Cp    = 1050; 
-g = 9.81; 
-R = 8.314;
-phi = alpha/(Cp*rho);
-%Dry Olivine Data
-Bn = 6.22254e-16;
-Bd = 1.5e-9; 
-En = 530e3; 
-n  = 3.5; 
-Ed = 375e3;
-Cn = (En*phi-Vn*(1-phi*Pr))/(R*Tp);
-Cd = (Ed*phi-Vd*(1-phi*Pr))/(R*Tp);
-% Slab length and thickness
- 
-% Compute Reference viscosity 
-eta0M = compute_reference_viscosity(Bn,En,Vn,n,Tp,Pr,t0,R);
-eta0DM = compute_reference_viscosity(Bd,Ed,Vd,1,Tp,Pr,t0,R);
-xium_0 = eta0DM/eta0M; 
-disp('=====================================================================')
-disp(['Reference viscosity upper mantle at T = ' num2str(Tp), 'K, and at P = ',num2str(Pr/1e9,2), ' GPa and at tau0 = ' num2str(t0), 'MPa is:'])
-disp(['log10(eta0) = ',num2str(log10(eta0M),4)])
-disp(['log10(eta0D) = ', num2str(log10(eta0DM),4)])
-disp('=====================================================================')
-% Compute Reference viscosity slab 
-Tavg =  compute_average_T_slab(D0,age,Tp);
-eta0S = compute_reference_viscosity(Bn,En,Vn,n,Tavg,Pr,t0,R);
-eta0DS = compute_reference_viscosity(Bd,Ed,Vd,1,Tavg,Pr,t0,R);
-xiuS_0 = eta0DS/eta0S; 
-% disp('=====================================================================')
-% disp(['Reference viscosity Slab at T = ' num2str(Tavg), 'K, and at P = ',num2str(Pr/1e9,2), ' GPa and at tau0 = ' num2str(t0), 'MPa is:'])
-% disp(['log10(eta0) = ',num2str(log10(eta0S),4)])
-% disp(['log10(eta0D) = ', num2str(log10(eta0DS),4)])
-% disp('=====================================================================')
-% Compute integral Upper mantle 
-Exn = @(x) compute_exponential(Cn,x,phi,3300*g);
-Exd = @(x) compute_exponential(Cd,x,phi,3300*g);
-intexn = (integral(Exn,0,L0))./L0;
-intexd = (integral(Exd,0,L0))./L0;
-eta0MP = eta0M*intexn;
-eta0MDP = eta0DM*intexd; 
-xium_P = eta0MDP/eta0MP; 
-if isnan(xium_P)
-bla = 0; 
-end
-disp('=====================================================================')
-disp(['Average reference viscosity UM integrated along the slab = '])
-disp(['log10(eta0) = ',num2str(log10(eta0MP),4)])
-disp(['log10(eta0D) = ', num2str(log10(eta0MDP),4)])
-disp(['xiUM0 = ' num2str(log10(xium_0)), ' and xiUMP =', num2str(log10(xium_P))])
-disp('=====================================================================')
-% Compute integral Slab 
-CnS = (En*phi-Vn*(1-phi*Pr))/(R*Tavg);
-CdS = (Ed*phi-Vd*(1-phi*Pr))/(R*Tavg);
-ExnS = @(x) compute_exponential(CnS,x,phi,(rho+drho)*g);
-ExdS = @(x) compute_exponential(CdS,x,phi,(rho+drho)*g);
-intexnS = (integral(ExnS,0,L0))./L0;
-intexdS = (integral(ExdS,0,L0))./L0;
-eta0SP = eta0S*intexn;
-eta0DSP = eta0DS*intexd; 
-xiS_P = eta0DSP/eta0SP; 
-% Compute the viscosity contrast 
-end
-function [eta0] = compute_reference_viscosity(B,E,V,n,Tp,Pr,t0,R)
-% Compute the reference viscosity for a given mechanism. Diffusion creep n
-% ==1, while power law != 1. 
-% =========================================================================
-% Input: 
-%==========================================================================
-% B,E,V,n => Rheological law parameter (Pre-exponential factor, energy of
-% activaction, volume of activation, stress exponent) 
-%==========================================================================
-% Output: 
-%==========================================================================
-% eta0 : reference viscosity for a given mechanism (which is going to be
-% multiplied for the integral of the exponential and the normalized stress
-% to obtain the actual viscosity
-%==========================================================================
-eta0 = 0.5*(1/B)*t0^(1-n)*exp((E+Pr*V)/(R*Tp));
-end
-function [avgT] = compute_average_T_slab(D0,age,Tp)
-kappa = 1e-6; 
-D0v    = 0:0.5e3:D0; 
-age = age*(365.25*60*60*24*1e6); 
-T    =  half_space(D0v,age,Tp,kappa);
-fun  = @(x) half_space(x,age,Tp,kappa);
-int = (integral(fun,0,80e3))./80e3; 
-avgT = int; 
-end
-function [T] = half_space(D0v,age,Tp,kappa)
-T = Tp-Tp.*erfc(D0v./2./sqrt(kappa*age));
+% compute Psi_0 from a slab that has fixed average temperature 
+iT = find(T_mean==T_plot); 
+xiuS = squeeze(SLAB.xiuS(:,:,iT));
+eta0DS = squeeze(SLAB.eta0DS(:,:,iT));
+eta0S  = squeeze(SLAB.eta0S(:,:,iT));
+etan = 1./(1./eta0DS+1./eta0S);
+eta0DM = squeeze(UPPER_MANTLE.eta0DMP(1,:,:))./(1+squeeze(UPPER_MANTLE.xiumP(1,:,:)));
+Lambda_0 = eta0DM.*0;
+Psi_0    = Lambda_0;
+for i = 1:1:length(L0)
+    Psi_0(:,i)    = eta0DM(:,i)./etan'; 
+    Lambda_0(:,i) = Psi_0(:,i).*gamma(i); 
 end
 
-function [exp_] = compute_exponential(C,l,phi,w)
-    exp_= exp(-C.*((l.*w)./(1+phi.*l*w)));
-end
+
+F2=figure(2)
+% plot xium vs L0 @ constant vd 
+    % Collect the field names 
+    % Set the min and max of lambda value for the coloring of the plot
+    z_min = min(Vnv);  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = max(Vnv);  %log10(max(Data_S(1,:)));
+    % See if the user installed Crameri cmap utilities, otherwise punish
+    % him with jet colormap by default
+    % Shamelessly copied from 
+    % https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+    
+    try
+        cmap = colormap(crameri('broc'));
+    catch
+        cmap = colormap('jet');
+    end
+    % Set colorbar
+    % Set colorbar
+   
+    for i = 1:length(Vnv)
+         c=colorbar;
+    c.Label.String = 'V_a []';
+    % Define coloraxis
+    caxis([z_min z_max])
+    % min/max are rounded using the log values of Lambda
+    val = (z_max-z_min)/10;
+    val2 = z_min:val:z_max;
+
+    Ticks=val2;
+    % Produce the tick
+    TickLabels=arrayfun(@(x) sprintf('{%0.4g}',x),Ticks,'UniformOutput',false);
+    try
+        set(c,'Ticks',Ticks);
+        set(c,'TickLabels',TickLabels);
+    catch %HG1
+        TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+        set(c,'YTick',Ticks);
+        set(c,'YTickLabel',TickLabels);
+    end
+         V = (Vnv(i)-z_min)/(z_max-z_min);
+        if V<0 
+              V=0;
+        elseif V>1
+          V=1;
+        end
+        V=round(1+V*(size(cmap,1)-1));%round to nearest index
+        C = cmap(V,:);
+        hold on
+        plot(L0/1000, Lambda_0(i,:),"Color",C)
+        set(gca, 'YScale', 'log')
+        xlabel('$L_0 [km]$',Interpreter='latex')
+        ylabel('$\Lambda_{0} [n.d.]$',Interpreter='latex')
+        title('$\Lambda_{0} [n.d.], T_P = 1250 [^\circ C], Vd = 5e-6,T=1200 K$',Interpreter='latex')
+
+    end
+    hold off
+    box on
+    grid on
+F3=figure(3)
+% plot xium vs L0 @ constant vd 
+    % Collect the field names 
+    % Set the min and max of lambda value for the coloring of the plot
+    z_min = min(Vnv);  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = max(Vnv);  %log10(max(Data_S(1,:)));
+    % See if the user installed Crameri cmap utilities, otherwise punish
+    % him with jet colormap by default
+    % Shamelessly copied from 
+    % https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+    
+    try
+        cmap = colormap(crameri('broc'));
+    catch
+        cmap = colormap('jet');
+    end
+    % Set colorbar
+    % Set colorbar
+   
+    for i = 1:length(Vnv)
+         c=colorbar;
+    c.Label.String = 'V_a []';
+    % Define coloraxis
+    caxis([z_min z_max])
+    % min/max are rounded using the log values of Lambda
+    val = (z_max-z_min)/10;
+    val2 = z_min:val:z_max;
+
+    Ticks=val2;
+    % Produce the tick
+    TickLabels=arrayfun(@(x) sprintf('{%0.4g}',x),Ticks,'UniformOutput',false);
+    try
+        set(c,'Ticks',Ticks);
+        set(c,'TickLabels',TickLabels);
+    catch %HG1
+        TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+        set(c,'YTick',Ticks);
+        set(c,'YTickLabel',TickLabels);
+    end
+         V = (Vnv(i)-z_min)/(z_max-z_min);
+        if V<0 
+              V=0;
+        elseif V>1
+          V=1;
+        end
+        V=round(1+V*(size(cmap,1)-1));%round to nearest index
+        C = cmap(V,:);
+        hold on
+        plot(L0/1000, Psi_0(i,:),"Color",C)
+        set(gca, 'YScale', 'log')
+        xlabel('$L_0 [km]$',Interpreter='latex')
+        ylabel('$\Psi_{0} [n.d.]$',Interpreter='latex')
+        title('$\Psi_{0} [n.d.], T_P = 1250 [^\circ C], Vd = 5e-6,T=1200 K$',Interpreter='latex')
+
+    end
+    hold off
+    box on
+    grid on
+
 
