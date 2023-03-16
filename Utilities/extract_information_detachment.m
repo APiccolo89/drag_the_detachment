@@ -56,14 +56,16 @@ for k = 1:numel(F)
     if ~isempty(TD.t_det) && isreal(TD.D_norm)
         Data_S.tdet(i) = TD.initial_data.n*TD.t_det;
         Data_S.tau_max(i)= TD.t_t_max;
-        Data_S.time_tau_max(i) = TD.time_t_M;
+        Data_S.time_tau_max(i) = TD.time_t_M*TD.initial_data.n;
         Data_S.tau_det(i)= TD.t_t_det;
         Data_S.tau_real_initial(i) = TD.tau(3,1); 
+        Data_S.tau_drag_initial(i) = -TD.tau(2,1);
         % compute the tc assuming that the reference stress is the initial
         % one: 
         tau_eff_in = Data_S.tau_real_initial(i)*TD.initial_data.s0;
         eps_c_drag = TD.initial_data.B_d.*tau_eff_in+TD.initial_data.B_n.*tau_eff_in.^TD.initial_data.n;
         Data_S.tc_drag(i) = 1./eps_c_drag; 
+        
 
     else
         Data_S.tdet(i) = nan;
@@ -72,6 +74,15 @@ for k = 1:numel(F)
         Data_S.tau_det(i)= nan;
         Data_S.tau_real_initial(i) = nan; 
         Data_S.tc_drag(i) = nan; 
+        Data_S.tau_drag_initial(i) = nan; 
+    end
+    if isfield(TD,'Meta_dataReal')
+        MD = TD.Meta_dataReal; 
+        fname = fieldnames(MD);
+        for in = 1:numel(fname)
+            Data_S.(fname{in})(i)=MD.(fname{in});
+        end
+
     end
     i = 1+i;
 end

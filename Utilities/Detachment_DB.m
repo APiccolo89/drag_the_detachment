@@ -23,6 +23,16 @@ classdef Detachment_DB < handle
         tau_max      % tau max 
         time_tau_max % time at which the tau max is happening
         tau_real_initial % initial stress at the initial stage
+        tau_drag_initial % initial drag stress 
+        T_Slab % Field that is useful for the realistic case: the average temperature of the slab in Kelvin
+        Tp    % Mantle potential temperature
+        Vn    % Activaction volume 
+        Vd    % Activaction volume 
+        Cd    % Exponential factor diffusion
+        Cn    % Exponential factor dislocation
+        phi   % adiabatic gradient
+        w     % weight force
+        Pr    % Reference pressure
     end
 
     methods

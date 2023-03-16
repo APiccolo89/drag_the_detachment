@@ -28,19 +28,10 @@ function Testdata = Run_Simulation_DragA(ID_A,nlm)
     % Create function handle 
     Funf_wi = @(t,x,xp0) compute_dragODEA(x,xp0,ID_A,nlm);
     % Set the option for resolving the system of equation
-    options = odeset('RelTol',1e-8,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
+    options = odeset('RelTol',1e-10,'NormControl','on','Events',@(t,x,xp0) det_EV(t,x,xp0,ID_A));
     % resolve the system
     [t,D,te,De,ie] = ode15i(Funf_wi,[0 20],ID_A.D0,dDdt0,options);
     [Testdata]=postprocess_data(t,D,ID_A,te,De,ie,0,0,nlm); 
-    if nargin == 0 
-    % run the twin test adimensional and check the residuum between the two
-    % functions. {Is giving allmost the same results?)
-    Testdata_D = Run_Simulation_Drag(ID_,1.0);
-    % Interpolate the results and plot them: 
-    [Intp_data]=Interpolation_routinesAD(Testdata_D,Testdata,Benchmark);
-    plot_benchmark(Intp_data,ID_,Testdata.D_norm,0.0)
-    end
-
 end
 
 function [res] = compute_dragODEA(D,dDdt,ID_A,nlm)
@@ -63,7 +54,7 @@ end
 % Event detection (not difficult, though, i just copied the matlab help
 % page (which has been copied also by Marcel in his code) 
 function [position,isterminal,direction] = det_EV(t,y,yp0,ID)
-    position = y(1)-0.05; % The value that we want to be zero
+    position = y(1)-0.1; % The value that we want to be zero
     % To be precise, each time step y(1) is the actual thickness. so,
     % D(t)-0.1*D0 must be 0 to stop the simulation and having an event. 
     % Additional mistake that I did the function handle must incorporate the

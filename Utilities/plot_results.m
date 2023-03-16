@@ -19,20 +19,30 @@ function plot_results(Tests,name,ptsave,nlm)
 end
 
 function [Data_S] = Plot_1D_Plots(Tests,Data_S,name,ptsave,pb)
+
+    tic 
+    %plot3D_setExp(Tests,Data_S,name,'D_norm',ptsave,pb)
+    toc 
     tic
-    plot1D_setExp(Tests,Data_S,name,'D_norm',ptsave,pb)
+    %plot1D_setExp(Tests,Data_S,name,'D_norm',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'tau_eff',ptsave,pb)
+    %plot1D_setExp(Tests,Data_S,name,'tau_eff',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'tau_D_tau_B',ptsave,pb)
+    %plot1D_setExp(Tests,Data_S,name,'tau_D_tau_B',ptsave,pb)
     toc
     tic
-    plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave,pb)
+    %plot1D_setExp(Tests,Data_S,name,'epsilon',ptsave,pb)
     toc
     tic
     plot1D_setExp(Tests,Data_S,name,'dDdt_tauD',ptsave,pb)
+    toc
+    tic
+%    plot1D_setExp(Tests,Data_S,name,'dDdt_tauD_norm',ptsave,pb)
+    toc
+    tic
+    plot1D_setExp(Tests,Data_S,name,'dDdt_t_d',ptsave,pb)
     toc
     if pb.islinear == 0
         plot1D_setExp(Tests,Data_S,name,'Lambda',ptsave,pb)
@@ -136,10 +146,13 @@ close;
 
 end 
 function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
-    figure(1)
-    % Collect the field names 
-    fn = fieldnames(Tests);
-    % Set the min and max of lambda value for the coloring of the plot
+
+
+    % Pre Process Data 
+    %=====================================================================%
+    % Interpolate in a  common ground all the data (i.e. vector between  %
+    % 0-100
+    %======================================================================
     z_min = -6;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
     z_max = 0; %round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
     % See if the user installed Crameri cmap utilities, otherwise punish
@@ -147,10 +160,14 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
     % Shamelessly copied from 
     % https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
     
+    figure(1)
+    % Collect the field names 
+    % Set the min and max of lambda value for the coloring of the plot
+    
     if strcmp(field,'D_norm')
         VAL = 0;
     elseif strcmp(field,'tau_eff')
-        VAL=1; 
+        VAL=1.0; 
     elseif strcmp(field,'epsilon')
         VAL = 2.0;
     elseif strcmp(field,'tau_D_tau_B')
@@ -158,37 +175,26 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
     elseif strcmp(field,'Lambda')
         VAL =4.0;
     elseif strcmp(field,'eta_mantle')
-        VAL = -4.0; 
+        VAL = 5.0; 
     elseif strcmp (field,'dDdt_tauD')
         VAL = 6.0; 
+    elseif strcmp(field,'dDdt_t_d')
+        VAL = 7.0; 
     else 
         VAL = 5; 
     end
 
     try
-        cmap = colormap(crameri('broc'));
+        cmap = colormap(crameri('bilbao'));
     catch
         cmap = colormap('jet');
     end
     % Set colorbar
     % Set colorbar
-    c=colorbar;
-    c.Label.String = 'log10(\Lambda) [n.d.]';
-    % Define coloraxis
-    caxis([z_min z_max])
-    % min/max are rounded using the log values of Lambda
-    Ticks=round((z_min)):round((z_max));
-    % Produce the tick
-    TickLabels=arrayfun(@(x) sprintf('10^{%d}',x),Ticks,'UniformOutput',false);
-    try
-        set(c,'Ticks',Ticks);
-        set(c,'TickLabels',TickLabels);
-    catch %HG1
-        TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
-        set(c,'YTick',Ticks);
-        set(c,'YTickLabel',TickLabels);
-    end
+   
     i = 1; % iterator 
+    fn = fieldnames(Tests);
+
     for k = 1:numel(fn) 
        TD = Tests.(fn{k});
        if ~isnan(Data_S.tdet(k))
@@ -210,10 +216,10 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
                
                set(gca, 'YScale', 'log')
            elseif VAL == 4
-               buf = (TD.Lambda)./(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM));
+               buf = (TD.Lambda);
                ylabel('$ \Lambda(t) [n.d.]$','interpreter','latex')
-               %set(gca, 'YScale', 'log')
-           elseif VAL==-4.0
+                set(gca, 'YScale', 'log')
+           elseif VAL==5.0
                buf = (TD.Lambda./TD.initial_data.Lambda).*TD.initial_data.eta0DM;
                ylabel('$ \eta^{UM}_{eff}(t) [n.d.]$','interpreter','latex')
                set(gca, 'YScale', 'log')
@@ -221,48 +227,66 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
            elseif VAL==6 
                buf = (-TD.tau(2,:)./TD.tau(1,:));
                buf = (buf(1:1:end-1)+buf(2:1:end))/2; 
-
+               buf = buf./max(abs(buf));
            else 
                 
     
            end
-    
-           % Normalize Lambda value w.r.t. the limit that I assumed to be
-           % likely
-           if nlm.islinear ==0 
-              V = (log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM))-z_min)/(z_max-z_min);
-           else
-              V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
-           end
-           if V<0 
-               V=0;
-           elseif V>1
-                V=1;
-           end
-           V=round(1+V*(size(cmap,1)-1));%round to nearest index
-           C = cmap(V,:);
+      
            hold on 
            if VAL  <5
                x = TD.time*TD.initial_data.n; 
-               xlim([0,10])
-               %set(gca, 'XScale', 'log')
+               xlabel('$\frac{t}{t_d} [n.d.]$','interpreter','latex')
+               if strcmp(field,'D_norm')
+                x = (TD.time*TD.initial_data.tc)./(365.25*60*60*24*1e6); 
+                xlabel('${t} [Myrs]$','interpreter','latex')
+               else
+                   xlim([0,15])
+               end
 
-               xlabel('$n*(\frac{t}{t_c}) [n.d.]$','interpreter','latex')
            else
+               xlabel('$log_{10}\left(\frac{dD}{dt}\right) [n.d.]$','Interpreter','latex')
+               ylabel('$log_{10}\left(\frac{\tau_{D}}{\tau_{0,B}}\right) [n.d.]$','Interpreter','latex')
+
                dD = TD.D_norm; 
                dD = dD(2:1:end)-dD(1:1:end-1);
-               x = TD.time*TD.initial_data.n; 
+               x = TD.time*TD.initial_data.n;  
+               x2 = x(2:1:end)/2+x(1:1:end-1)/2;
+               time_max=TD.time_t_M*TD.initial_data.n;
+               ind = find(x2<=time_max);
+               ind = ind(end)-1; 
                x = x(2:1:end)-x(1:1:end-1);
                x = dD./x; 
-               %xlim([0.1,1.0])
-               xlabel('$\frac{dD}{dt} [n.d.]$','Interpreter','latex')
+               if VAL == 7
+                buf = x; 
+                x   = x2; 
+                ylabel('$log_{10}\left(\frac{dD}{dt}\right) [n.d.]$','Interpreter','latex')
+                xlabel('$log_{10}\left(\frac{t}{t_d}\right) [n.d.]$','Interpreter','latex')
+
+
+               end
+               %if VAL == 7 
+                %    xlabel('$norm\left(\frac{dD}{dt})\right) [n.d.]$','Interpreter','latex')
+                 %   ylabel('$norm\left(\frac{\tau_D}{\tau_{0,B}}\right) [n.d.]$','Interpreter','latex')
+                  %  x = x./max(abs(x)); 
+               
+               %end
+               scatter(x(ind),buf(ind),10,'red','filled','d');
+               
            end
-           plot(x,buf,'Color',C,LineWidth=0.8)
-           grid on 
+           
+
+           plot(x,buf,'Color','k',LineWidth=0.7)
+            set(gca, 'YScale', 'log')
+            set(gca, 'XScale', 'log')
        end        
        i = i+1; 
     end
+   
     box on
+    box on
+    grid on
+
     name_picture = strcat('Global_test1D',field,name,'.png');
     pt=fullfile(ptsave,field);
     if not(isfolder(pt))
@@ -275,4 +299,265 @@ function  plot1D_setExp(Tests, Data_S,name,field,ptsave,nlm)
     print(pt,'-dpng')
     clf; 
     close;
+end
+
+function  plot3D_setExp(Tests, Data_S,name,field,ptsave,nlm)
+
+close all; 
+clf; 
+% Pre Process Data
+%=====================================================================%
+% Interpolate in a  common ground all the data (i.e. vector between  %
+% 0-100
+%======================================================================
+if nlm.islinear
+    z_min = -6;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = 0; %round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
+else
+    z_min = -12;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+    z_max = 0; 
+end
+% See if the user installed Crameri cmap utilities, otherwise punish
+% him with jet colormap by default
+% Shamelessly copied from
+% https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+
+fn = fieldnames(Tests);
+
+t_intp = 0:0.0001:20;
+DS = ones(3000,length(fn)).*nan;
+ts = DS; 
+bla = 0; 
+for k = 1:numel(fn)
+    TD = Tests.(fn{k});
+    y_d = TD.D_norm;
+    is = isreal(y_d);
+    if is == 0 
+        bla = bla+1 ; 
+    end
+    if is == 1 
+        %y_d = real(y_d); 
+        x = TD.time.*TD.initial_data.n;
+        DS(1:length(y_d),k) = y_d;
+        ts(1:length(y_d),k) = x; 
+        if nlm.islinear ==0
+            lambda=log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM));
+            V = (log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM))-z_min)/(z_max-z_min);
+        else
+            lambda = log10(TD.initial_data.Lambda);
+            V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
+        end
+        if V<0
+            V=0;
+        elseif V>1
+            V=1;
+        end
+        V=round(1+V*(256-1));%round to nearest index
+        V_map(k) = V;
+        L_axis(k) = 10.^lambda;
+    
+        Det(k) = x(end);
+    else
+        V_map(k) = nan;
+        L_axis(k)=nan;
+        DS(:,k) = nan;
+        ts(:,k) = nan;
+        Det(k) = nan;    
+    end
+end
+
+
+disp(bla)
+
+
+F=figure(1);
+% Collect the field names
+% Set the min and max of lambda value for the coloring of the plot
+% Set colorbar
+% Set colorbar
+ try
+        cmap = colormap(crameri('bilbao'));
+    catch
+        cmap = colormap('jet');
+    end
+c=colorbar;
+c.Label.Interpreter = 'latex';
+c.Label.String = ['$log_{10}\left(\frac{\Lambda}{1+\xi^{UM}}\right), [n.d.]$'];
+% Define coloraxis
+caxis([z_min z_max])
+% min/max are rounded using the log values of Lambda
+Ticks=round((z_min)):round((z_max));
+% Produce the tick
+TickLabels=arrayfun(@(x) sprintf('10^{%d}',x),Ticks,'UniformOutput',false);
+try
+    set(c,'Ticks',Ticks);
+    set(c,'TickLabels',TickLabels);
+catch %HG1
+    TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+    set(c,'YTick',Ticks);
+    set(c,'YTickLabel',TickLabels);
+end
+
+V_map(isnan(V_map))=1; 
+C = cmap(V_map,:);
+bla = 1; 
+for i = 1:(size(DS,2))
+    hold on
+    plot3(ts(:,i),DS(:,i),L_axis(i).*ones(length(ts(:,1)),1),'Color',C(i,:),'LineWidth',1.2);
+    
+end
+scatter3(Det(~isnan(Det)==1),0.05.*ones(length(Det(~isnan(Det)==1)),1),L_axis(~isnan(Det)==1),10,'k','filled','d')
+plot3(ts(:,1:end),DS(:,1:end),1e-14.*ones(length(ts(:,1)),1),'Color','k','LineWidth',0.6)
+set(gca, 'ZScale', 'log');
+set(gca,'color',[0.7 0.7 0.7])
+xlim([0,15])
+ylim([0.05,1.1])
+grid on 
+box on
+view(-40,30)
+xlabel('$\frac{t}{t_d}, [n.d]$',Interpreter='latex')
+ylabel('$\frac{D}{D_0}, [n.d]$',Interpreter='latex')
+zlabel('$log_{10}\left(\frac{\Lambda}{1+\xi^{UM}}\right), [n.d.]$',Interpreter='latex')
+
+
+name_picture = strcat('3dDnorm.png');
+pt=fullfile(ptsave,field);
+if not(isfolder(pt))
+    mkdir(pt);
+end
+pt=fullfile(pt,name_picture);
+disp(pt)
+set(F, 'InvertHardCopy', 'off');
+set(F, 'PaperPositionMode','auto', 'PaperOrientation','portrait')
+export_fig(F,pt, '-dpng','-r600','-transparent')
+clf;
+close;
+end
+
+
+function  plot3D_setExp2(Tests, Data_S,name,field,ptsave,nlm)
+
+
+% Pre Process Data
+%=====================================================================%
+% Interpolate in a  common ground all the data (i.e. vector between  %
+% 0-100
+%======================================================================
+z_min = -6;  %round(log10(min(Data_S(1,Data_S(1,:)<1.0))));%log10(min(Data_S(1,:)));
+z_max = 0; %round(log10(max(Data_S(1,Data_S(1,:)<1.0)))); %log10(max(Data_S(1,:)));
+% See if the user installed Crameri cmap utilities, otherwise punish
+% him with jet colormap by default
+% Shamelessly copied from
+% https://de.mathworks.com/matlabcentral/answers/595864-how-to-plot-a-line-graph-x-y-with-a-color-bar-representing-z-axis
+
+fn = fieldnames(Tests);
+
+t_intp = 0:0.0001:20;
+DS = ones(3000,length(fn)).*nan;
+ts = DS; 
+bla = 0; 
+for k = 1:numel(fn)
+    TD = Tests.(fn{k});
+    y_d = (-TD.tau(2,:)./TD.tau(1,:));
+    is = isreal(y_d);
+    if is == 0 
+        bla = bla+1 ; 
+    end
+    if is == 1 
+        %y_d = real(y_d); 
+        x = TD.time.*TD.initial_data.n;
+        DS(1:length(y_d),k) = y_d;
+        ts(1:length(y_d),k) = x; 
+        if nlm.islinear ==0
+            lambda=log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM));
+            V = (log10(TD.initial_data.Lambda./(1+TD.initial_data.Df_UM))-z_min)/(z_max-z_min);
+        else
+            lambda = log10(TD.initial_data.Lambda);
+            V = (log10(TD.initial_data.Lambda)-z_min)/(z_max-z_min);
+        end
+        if V<0
+            V=0;
+        elseif V>1
+            V=1;
+        end
+        V=round(1+V*(256-1));%round to nearest index
+        V_map(k) = V;
+        L_axis(k) = 10.^lambda;
+    
+        Det(k) = x(end);
+    else
+        V_map(k) = nan;
+        L_axis(k)=nan;
+        DS(:,k) = nan;
+        ts(:,k) = nan;
+        Det(k) = nan;    
+    end
+end
+
+
+disp(bla)
+
+
+F=figure(1);
+% Collect the field names
+% Set the min and max of lambda value for the coloring of the plot
+% Set colorbar
+% Set colorbar
+ try
+        cmap = colormap(crameri('bilbao'));
+    catch
+        cmap = colormap('jet');
+    end
+c=colorbar;
+c.Label.String = 'log10(\Lambda) [n.d.]';
+% Define coloraxis
+caxis([z_min z_max])
+% min/max are rounded using the log values of Lambda
+Ticks=round((z_min)):round((z_max));
+% Produce the tick
+TickLabels=arrayfun(@(x) sprintf('10^{%d}',x),Ticks,'UniformOutput',false);
+try
+    set(c,'Ticks',Ticks);
+    set(c,'TickLabels',TickLabels);
+catch %HG1
+    TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+    set(c,'YTick',Ticks);
+    set(c,'YTickLabel',TickLabels);
+end
+
+V_map(isnan(V_map))=1; 
+C = cmap(V_map,:);
+bla = 1; 
+for i = 1:(size(DS,2))
+    hold on
+    plot3(ts(:,i),DS(:,i),L_axis(i).*ones(length(ts(:,1)),1),'Color',C(i,:),'LineWidth',1.2);
+    
+end
+plot3(ts(:,1:end),DS(:,1:end),1e-10.*ones(length(ts(:,1)),1),'Color','k','LineWidth',0.6)
+set(gca, 'ZScale', 'log');
+set(gca, 'YScale', 'log');
+
+set(gca,'color',[0.7 0.7 0.7])
+xlim([0,15])
+ylim([0.05,1.1])
+grid on 
+box on
+view(-40,30)
+xlabel('$\frac{t}{t_d}, [n.d]$',Interpreter='latex')
+ylabel('$\frac{D}{D_0}, [n.d]$',Interpreter='latex')
+zlabel('$log_{10}(\Lambda), [n.d.]$',Interpreter='latex')
+
+
+name_picture = strcat('3D_other.png');
+pt=fullfile(ptsave,field);
+if not(isfolder(pt))
+    mkdir(pt);
+end
+pt=fullfile(pt,name_picture);
+disp(pt)
+set(F, 'InvertHardCopy', 'off');
+set(F, 'PaperPositionMode','auto', 'PaperOrientation','portrait')
+export_fig(F,pt, '-dpng','-r600','-transparent')
+clf;
+close;
 end

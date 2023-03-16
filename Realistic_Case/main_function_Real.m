@@ -79,9 +79,6 @@ function  [eta0SP,eta0DSP] = compute_effective_viscosity_slab(Vn,Vd,t0,Pr,T_Mean
 [Cd,Cn,phi] = S.Compute_Cd_Cn(Pr,Vn,Vd,T_Mean); 
 % Compute Reference viscosity slab 
 Tavg =  T_Mean;%compute_average_T_slab(D0,age,Tp);
-if Tavg > 800
-bla = 0 
-end
 eta0SP = compute_reference_viscosity(S.Bn,S.En,Vn,S.n,Tavg,Pr,t0,S.R);
 eta0DSP = compute_reference_viscosity(S.Bd,S.Ed,Vd,1,Tavg,Pr,t0,S.R);
 
