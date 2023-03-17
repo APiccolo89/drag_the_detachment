@@ -4,6 +4,7 @@ clear all;
 close all;
 addpath Adimensional\
 addpath Dimensional\
+addpath \Users\'Andrea Piccolo'\Dropbox\freezeColors-master\
 addpath Utilities\
 addpath D0_D2_comparison_function\
 clear all
@@ -14,7 +15,7 @@ Df_S=10;
 nlm = Problem_type.NonLinear;
 Df_UM = nan;
 DB_path = '../Test_DB2.hdf5';
-pt_save = '../../Results/PRESENTATION_Comparison2D_LN';
+pt_save = '../../Results/PRESENTATION_Comparison2D_NL';
 if not(isdir(pt_save))
      mkdir(pt_save);
 end
@@ -66,6 +67,8 @@ ax = gca;
 scatter(FIT.Lambda,FIT.fetch(2,:),20,[204 204 255]./255,'filled','o','MarkerEdgeColor','k');
 hold on
 ax.XScale = 'log';
+ax.YScale = 'log';
+
 ax.XColor = [0,0,0];
 ax.YLim = [0,100];
 ax.XLabel.String = "$log\left(\frac{\Lambda}{1+\xi^{\mathrm{UM}}}\right)$"; 
@@ -138,7 +141,7 @@ for ktest = 1:flength
 
     if ~isempty(D_0D)
     c_l1 = [-8,0];% lim color Lambda
-    c_l2 = [0,60];% lim color Res
+    c_l2 = [0,2];% lim color Res
     R    = TB.(fnames{ktest}).res.*100;
     L    = TB.(fnames{ktest}).ID.Lambda; 
     if nlm.islinear == 0
@@ -169,7 +172,7 @@ for ktest = 1:flength
     ax.YColor = [0 0 0 ];
     ax.LineWidth = 1.0;
     cmap = colormap(crameri('bilbao',256));
-    c = colorbar;freezeColors;
+    c = colorbar;
     Ticks=round([min(c_l1):max(c_l1)]);
     % Produce the tick
     TickLabels=arrayfun(@(x) sprintf('$10^{%d}$',x),Ticks,'UniformOutput',false);
@@ -179,7 +182,9 @@ for ktest = 1:flength
     c.TickLabels=TickLabels;
     %c.Location = 'eastoutside';
     c.FontSize = 12;
-    caxis(c_l1);freezeColors(c);
+    c.Label.String = '$\frac{\Lambda}{1+\xi^{\mathrm{UM}}}$';
+    c.Label.Interpreter = 'latex';
+    caxis(c_l1);
     
 
     F2 = figure(10);
@@ -211,7 +216,9 @@ for ktest = 1:flength
     c.TickLabels=TickLabels;
     %c.Location = 'eastoutside';
     c.FontSize = 12;
-    caxis(c_l1);freezeColors(c);
+    c.Label.String = '$\frac{\Lambda}{1+\xi^{\mathrm{UM}}}$';
+    c.Label.Interpreter = 'latex';
+    caxis(c_l1);
     % Select Data 
 
     % Produce plot and Color with final Lambda
@@ -240,7 +247,7 @@ for ktest = 1:flength
     ax2.YColor = [0 0 0 ];
     ax2.LineWidth = 1.0;
     c2 = colorbar;
-    Ticks=round([min(c_l2):10:max(c_l2)]);
+    Ticks=round([min(c_l2):1:max(c_l2)]);
     % Produce the tick
     TickLabels=arrayfun(@(x) sprintf('${%d}$',x),Ticks,'UniformOutput',false);
     %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
@@ -250,7 +257,8 @@ for ktest = 1:flength
     %c.Location = 'eastoutside';
     c2.FontSize = 12;
     ax2.Color=[.90,.90,.90];
-
+    c2.Label.String = 'F, [%]';
+   
     c2.Color    = [0,0,0];
     caxis(c_l2)
 
@@ -276,7 +284,7 @@ for ktest = 1:flength
     ax2.YColor = [0 0 0 ];
     ax2.LineWidth = 1.0;
     c2 = colorbar;
-    Ticks=round([min(c_l2):10:max(c_l2)]);
+    Ticks=round([min(c_l2):1:max(c_l2)]);
     % Produce the tick
     TickLabels=arrayfun(@(x) sprintf('${%d}$',x),Ticks,'UniformOutput',false);
     %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
@@ -286,7 +294,8 @@ for ktest = 1:flength
     %c.Location = 'eastoutside';
     c2.FontSize = 12;
     ax2.Color=[.90,.90,.90];
-
+   c2.Label.String = 'F, [%]';
+  %  c2.Label.Interpreter = 'latex';
     c2.Color    = [0,0,0];
     caxis(c_l2)
 
@@ -315,7 +324,7 @@ for ktest = 1:flength
     ax2.YColor = [0 0 0 ];
     ax2.LineWidth = 1.0;
     c2 = colorbar;
-    Ticks=round([min(c_l2):10:max(c_l2)]);
+    Ticks=round([min(c_l2):1:max(c_l2)]);
     % Produce the tick
     TickLabels=arrayfun(@(x) sprintf('${%d}$',x),Ticks,'UniformOutput',false);
     %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
@@ -325,7 +334,8 @@ for ktest = 1:flength
     %c.Location = 'eastoutside';
     c2.FontSize = 12;
     ax2.Color=[.90,.90,.90];
-
+   c2.Label.String = 'F, [%]';
+  %  c2.Label.Interpreter = 'latex';
     c2.Color    = [0,0,0];
     caxis(c_l2)
 
@@ -350,7 +360,7 @@ for ktest = 1:flength
     ax2.YColor = [0 0 0 ];
     ax2.LineWidth = 1.0;
     c2 = colorbar;
-    Ticks=round([min(c_l2):10:max(c_l2)]);
+    Ticks=round([min(c_l2):1:max(c_l2)]);
     % Produce the tick
     TickLabels=arrayfun(@(x) sprintf('${%d}$',x),Ticks,'UniformOutput',false);
     %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
@@ -360,7 +370,7 @@ for ktest = 1:flength
     %c.Location = 'eastoutside';
     c2.FontSize = 12;
     ax2.Color=[.90,.90,.90];
-
+   c2.Label.String = 'F, [%]';
     c2.Color    = [0,0,0];
     caxis(c_l2)
     % color with residuum 

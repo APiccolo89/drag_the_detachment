@@ -81,11 +81,12 @@ s      = ID_A.s;
 gamma2 = (D0*alpha)./(s);
 n_cor    = (n-1)./n; 
 
-temporary_var = xium.*(gamma2.*(D0./D).^2.*abs(dDdt)).^n_cor+1;
+temporary_var = 1+xium.*(gamma2.*(D0./D).^2.*abs(dDdt)).^n_cor+1;
 eta_um    = ID_A.eta0DM./temporary_var; 
     if eta_um < ID_A.eta_CF & ID_A.cut_off_Mantle >0.0
         Lambda     = ID_A.Lambda./ID_A.eta0DM;
         Lambda     = Lambda.*ID_A.eta_CF; 
+        eta_um    = ID_A.eta_CF;
     else
     
         Lambda        = ID_A.Lambda./temporary_var; 
