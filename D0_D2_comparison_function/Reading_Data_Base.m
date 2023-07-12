@@ -42,24 +42,24 @@ if nlm.islinear == 0
     disp(['xium is ', num2str(P_Var.xiUM)])
 end
 
-% 
-% disp('=====================================================================')
-% disp(['node ',Test_name, 'is processed'])
-% if P_Var.failed ==0
-%     disp(['it was a successful test'])
-% else
-%     disp(['It was not a succesful test'])
-% end
-% disp('=====================================================================')
-% disp(['L0 is ', num2str(P_Var.L0./1e3), ' [km]'])
-% disp(['tc is ', num2str(P_Var.tc), ' [Myrs]'])
-% disp(['tau0 is ', num2str(P_Var.s0./1e6), ' [MPa]'])
-% disp(['log10(eta0DS) is ', num2str(log10(P_Var.eta0DS)), ' [Pa.s]'])
-% disp(['log10(eta0DM) is ', num2str(log10(P_Var.eta0DM)), ' [Pa.s]'])
-% disp('=====================================================================')
-% disp('=====================================================================')
-% disp('When a test is failed, means that the detachment scales are higher than 10 n*t/tc')
-% disp('or that the detachment timescale are exceeding 100 Myrs, which has no geological sense')
+
+disp('=====================================================================')
+disp(['node ',Test_name, 'is processed'])
+if P_Var.failed ==0
+    disp(['it was a successful test'])
+else
+    disp(['It was not a succesful test'])
+end
+disp('=====================================================================')
+disp(['L0 is ', num2str(P_Var.L0./1e3), ' [km]'])
+disp(['tc is ', num2str(P_Var.tc), ' [Myrs]'])
+disp(['tau0 is ', num2str(P_Var.s0./1e6), ' [MPa]'])
+disp(['log10(eta0DS) is ', num2str(log10(P_Var.eta0DS)), ' [Pa.s]'])
+disp(['log10(eta0DM) is ', num2str(log10(P_Var.eta0DM)), ' [Pa.s]'])
+disp('=====================================================================')
+disp('=====================================================================')
+disp('When a test is failed, means that the detachment scales are higher than 10 n*t/tc')
+disp('or that the detachment timescale are exceeding 100 Myrs, which has no geological sense')
 
 
 if P_Var.failed == 1
