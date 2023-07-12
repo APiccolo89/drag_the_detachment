@@ -17,7 +17,7 @@ D0v=[];
 eta_z=[];
 T_z=[]; 
 
-
+% compute reference viscosity
 eta0 = 0.5*(1/B)*t0^(1-n)*exp((E+Pr*V)/(R*Tp));
 if ~isnan(age)
     kappa = 1e-6;
@@ -41,8 +41,6 @@ end
 function [T] = half_space(D0v,age,Tp,kappa)
 T = Tp-(Tp-(20+273.15)).*erfc(D0v./2./sqrt(kappa*age));
 end
-
-
 
 function [eta0] = eta_fun(d,B,E,V,n,Pr,t0,R,fun) 
 T = fun(d); 

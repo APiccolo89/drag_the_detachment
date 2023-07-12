@@ -1,14 +1,19 @@
 function [UPPER_MANTLE,SLAB] = main_function_Real(t0, T_Mean, Tp,Pr, D0,L0,Vnv,Vdv,UM,S,age)
-% 
-% if isnan(T_Mean)
-%     for i =1:length(age)
-%         T_Mean=compute_average_T_slab(D0,age,Tp);
-%     end
-% 
-% end
-
-if isnan(t0)
-
+% Input argument: 
+% t0     : reference stress
+% T_mean : mean temperature of the slab (vector)
+% Tp     : Mantle potential temperature
+% Pr     : Reference Pressure
+% D0     : Thicknes of the slab
+% L0     : Length of the slab (vector
+% Vnv/Vdv : Activation volume dislocation and diffusion creep
+% UM     : object Upper mantle 
+% S      : object Slab 
+% Output Argument: 
+% Upper mantle structure with the relevant data per each of the potential 
+% simulation
+if isnan(t0) % If we compute tau0 self consistently: 
+    %% Upper Mantle 
     [MMVn,MMVd,MML0,MMT_av]  = ndgrid(Vnv,Vdv,L0,T_Mean);
     eta0DMP = (MMVn./MMVn).*0.0;
     eta0MP  = (MMVn./MMVn).*0.0;
@@ -34,7 +39,7 @@ if isnan(t0)
     UPPER_MANTLE.MMT_av = MMT_av;
     UPPER_MANTLE.MMs0    = MMs0;
 
-
+    %% Slab
     [MMVnS,MMVdS,MML0S,MMT_avS]  = ndgrid(Vnv,Vdv,L0,T_Mean);
     eta0DS = (MMVnS./MMVnS).*0.0;
     eta0S  = (MMVnS./MMVnS).*0.0;
@@ -51,7 +56,6 @@ if isnan(t0)
         xiuS(i) = eta0DS(i)./eta0S(i);
     end
     % Store Slab structure
-
     SLAB.eta0DS = eta0DS;
     SLAB.eta0S = eta0S;
     SLAB.xiuS  = xiuS;
@@ -60,11 +64,6 @@ if isnan(t0)
     SLAB.MMT_av     = MMT_avS;
     SLAB.MML0S     = MML0S; 
     SLAB.MMs0     = MMs0;
-
-
-
-
-
 
 else
 
@@ -104,7 +103,6 @@ else
         xiuS(i) = eta0DS(i)./eta0S(i);
     end
     % Store Slab structure
-
     SLAB.eta0DS = eta0DS;
     SLAB.eta0S = eta0S;
     SLAB.xiuS  = xiuS;
@@ -163,41 +161,5 @@ function [exp_] = compute_exponential(C,l,phi,w)
 end
 
 
-function [avgT] = compute_average_T_slab(D0,age,Tp)
-kappa = 1e-6; 
-D0v    = 0:0.5e3:D0; 
-age = age*(365.25*60*60*24*1e6); 
-T    =  half_space(D0v,age,Tp,kappa);
-fun  = @(x) half_space(x,age,Tp,kappa);
-int = (integral(fun,0,D0))./80e3; 
-ind_ = find(T>=int,1);
-int2 = (integral(fun,D0v(ind_),D0))./(D0-D0v(ind_));
-int3 = (integral(fun,0,D0v(ind_)))./(D0v(ind_)-0.0);
-avgT = [int3,int,int2]; 
-figure(1000) 
-plot(T-273.15,-D0v./1e3,'k','LineWidth',1.2)
-hold on
-line([int-273.15,int-273.15],[-80,0.0],'Color','k','LineWidth',2.0,'LineStyle','-.')
-line([int2,int2]-273.15,[-80.0,-D0v(ind_)./1000],'Color','r','LineWidth',2.0,'LineStyle','-.')
-line([int3,int3]-273.15,[-D0v(ind_)./1000,0.0],'Color','b','LineWidth',2.0,'LineStyle','-.')
-grid on
-set(gca,'XTickLabel',[]);
-set(gca,'YTickLabel',[]);
-%xticklabels({});
-%yticklabels({});
-
-print('BarPlot','-dpng')
-bla = 0;
-
-
-
-
-
-end
-
-
-function [T] = half_space(D0v,age,Tp,kappa)
-T = Tp-(Tp-(20+273.15)).*erfc(D0v./2./sqrt(kappa*age));
-end
 
 
