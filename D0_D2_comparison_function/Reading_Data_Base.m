@@ -1,4 +1,4 @@
-function [P_Var,D,t,Tau,d,tdet,topo,tauL] = Reading_Data_Base(Test_name,DB_path,Df_S,nlm)
+function [P_Var,D,t,Tau,d,tdet,topo,tauL,d2,D_matrix] = Reading_Data_Base(Test_name,DB_path,Df_S,nlm)
 %==========================================================================
 % Function to read h5 file data.
 % Input : Test Name, Data base path
@@ -14,6 +14,7 @@ status = strcat(Test_name,'/failed');
 P_Var.failed = h5read(DB_path,status);
 
 path_D = strcat(Test_name,'/TimeEvolution/Slab1D/D');
+path_D2 = strcat(Test_name,'/TimeEvolution/Slab2D/D');
 path_t = strcat(Test_name,'/TimeEvolution/time');
 path_L0 = strcat(Test_name,'/Initial_Data/Initial_Condition/L0');
 path_tc = strcat(Test_name,'/Initial_Data/Initial_Condition/tc');
@@ -41,31 +42,33 @@ if nlm.islinear == 0
     disp(['xium is ', num2str(P_Var.xiUM)])
 end
 
-
-disp('=====================================================================')
-disp(['node ',Test_name, 'is processed'])
-if P_Var.failed ==0
-    disp(['it was a successful test'])
-else
-    disp(['It was not a succesful test'])
-end
-disp('=====================================================================')
-disp(['L0 is ', num2str(P_Var.L0./1e3), ' [km]'])
-disp(['tc is ', num2str(P_Var.tc), ' [Myrs]'])
-disp(['tau0 is ', num2str(P_Var.s0./1e6), ' [MPa]'])
-disp(['log10(eta0DS) is ', num2str(log10(P_Var.eta0DS)), ' [Pa.s]'])
-disp(['log10(eta0DM) is ', num2str(log10(P_Var.eta0DM)), ' [Pa.s]'])
-disp('=====================================================================')
-disp('=====================================================================')
-disp('When a test is failed, means that the detachment scales are higher than 10 n*t/tc')
-disp('or that the detachment timescale are exceeding 100 Myrs, which has no geological sense')
+% 
+% disp('=====================================================================')
+% disp(['node ',Test_name, 'is processed'])
+% if P_Var.failed ==0
+%     disp(['it was a successful test'])
+% else
+%     disp(['It was not a succesful test'])
+% end
+% disp('=====================================================================')
+% disp(['L0 is ', num2str(P_Var.L0./1e3), ' [km]'])
+% disp(['tc is ', num2str(P_Var.tc), ' [Myrs]'])
+% disp(['tau0 is ', num2str(P_Var.s0./1e6), ' [MPa]'])
+% disp(['log10(eta0DS) is ', num2str(log10(P_Var.eta0DS)), ' [Pa.s]'])
+% disp(['log10(eta0DM) is ', num2str(log10(P_Var.eta0DM)), ' [Pa.s]'])
+% disp('=====================================================================')
+% disp('=====================================================================')
+% disp('When a test is failed, means that the detachment scales are higher than 10 n*t/tc')
+% disp('or that the detachment timescale are exceeding 100 Myrs, which has no geological sense')
 
 
 if P_Var.failed == 1
     D = [];
+    D_matrix = [];
     t= [];
     Tau = [];
     d  = [];
+    d2 = [];
     tdet = []; 
     topo = []; 
     tauL= []; 
@@ -75,12 +78,15 @@ else
     % Relevant Information
     D = h5read(DB_path,path_D);
     D=D./D(1);
+    D_matrix = h5read(DB_path,path_D2);
+    D_matrix = D_matrix./D(1); 
     t= h5read(DB_path,path_t);
     t = t./P_Var.tc;
     tau = h5read(DB_path,path_tau);
 
     Tau = tau./(P_Var.s0./1e6);
     d = (h5read(DB_path,path_depth)+100)./(P_Var.L0/1000); 
+    d2 = h5read(DB_path,path_depth)+100; 
     topo_1  = h5read(DB_path,path_topo);
     topo    = mean(topo_1,2);
     tauL    = h5read(DB_path,path_tauL)./(P_Var.s0./1e6);

@@ -35,8 +35,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
         tau_D = +ID_A.Lambda.*tau_B.^3.*ID_A.fetch(2).*dDdt; 
     else
         %compute alternative lambda using dDdt 
-        [Lambda] = Compute_Lambda_re(ID_A,dDdt,D);
-        %[tau_M,Lambda] = compute_drag_stressA(ID_A,D,dDdt); 
+        [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D);
         tau_D = Lambda.*tau_B.^3.*dDdt.*ID_A.fetch(2);
     end
     tau_eff = tau_fetch.*(tau_B-(abs(tau_D)));
@@ -54,6 +53,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
         varargout{2} = tau_B; 
         varargout{3} = tau_D; 
         varargout{4} = Lambda; 
+        varargout{5} = eta_um; 
     else
         varargout{1} = tau_eff;
         varargout{2} = tau_B; 
@@ -63,7 +63,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
 end
 
 
-function [Lambda] = Compute_Lambda_re(ID_A,dDdt,D)
+function [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D)
 %==========================================================================
 %Input: ID_A structure with the non dimensionalised parameter
 %       dDdt non dimensionalised necking rate
@@ -81,10 +81,13 @@ s      = ID_A.s;
 gamma2 = (D0*alpha)./(s);
 n_cor    = (n-1)./n; 
 
-temporary_var = xium.*(gamma2.*(D0./D).^2.*abs(dDdt)).^n_cor+1;
-eta_mantle    = ID_A.eta0DM./temporary_var; 
-    if eta_mantle < ID_A.eta_CF 
-        Lambda     = ID_A.Lambda./ID_A.Lambda./temporary_var; 
+temporary_var = 1+xium.*(gamma2.*(D0./D).^2.*abs(dDdt)).^n_cor+1;
+eta_um    = ID_A.eta0DM./temporary_var; 
+    if eta_um < ID_A.eta_CF & ID_A.cut_off_Mantle >0.0
+        Lambda     = ID_A.Lambda./ID_A.eta0DM;
+        Lambda     = Lambda.*ID_A.eta_CF; 
+        eta_um    = ID_A.eta_CF;
+        Lambda_cut_off = (ID_A.eta_CF./ID_A.etaS).*ID_A.
     else
     
         Lambda        = ID_A.Lambda./temporary_var; 

@@ -35,8 +35,11 @@ tau = [t_B,t_D,t_eff];
 eps = [eps_eff,eps_d,eps_n];
 Testdata.time   = t; %time vector divided by the detachment timescale
 Testdata.D_norm = D;
-Testdata.t_det   = te;
-
+if isempty(te) || ~isreal(te)
+    Testdata.t_det = nan; 
+else
+    Testdata.t_det   = te;
+end
 Testdata.tau(1,:) = tau(:,1);
 Testdata.tau(2,:) = tau(:,2);
 Testdata.tau(3,:) = tau(:,3);

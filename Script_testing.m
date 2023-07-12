@@ -91,12 +91,12 @@ if nlm.islinear==0
     D0_v      = 80e3;                      % thickness [m]
     s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
     % Slab Rheology
-    eta0DS_v   = 10.^[22,23,24];                      % [Pas] reference diffusion creep viscosity of the slab
-    xiUS_v     = 10.^[0,1,2,4,6,8,10];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
-    n_v        = [3.5];            % [n.d.] pre-exponential factor
+    eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
+    xiUS_v     = 10.^[2,4,6,8,10];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+    n_v        = [3.5,5.0];            % [n.d.] pre-exponential factor
     % Upper Mantle
     eta0DM_v  = 10.^[21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
-    xiUM_v    = 10.^[2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+    xiUM_v    = 10.^[-2,-1,0,1,2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
 end
 
 
@@ -129,7 +129,7 @@ if nlm.islinear == 1
     number_tests = length(nTv(:)); 
     initial_vectors.number_tests = number_tests; 
 else
-    filename_ = 'NonLinear_Tests_Data_Base.mat';
+    filename_ = 'NonLinear_Tests_Data_Base_n3.mat';
     [nTv,~] = ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,xiUS_v,xiUM_v,D0_v,n_v);
     number_tests = length(nTv(:)); 
     initial_vectors.number_tests = number_tests; 
