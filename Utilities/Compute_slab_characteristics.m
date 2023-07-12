@@ -59,29 +59,27 @@ if nargin == 0 || nargin == 1 %default value for the unit test:
 
 end
 
-
-
-eta0NS = (1/Df_S).*eta0DS; 
+eta0NS = (1/Df_S).*eta0DS; % Dislocation creep viscosity
 if nlm.islinear
     eta0NM = eta0DM; 
     n_m    = 1.0; 
 else 
     eta0NM = (1/Df_UM).*eta0DM; 
 end 
-drho       = 2*s0/(9.81*l0);     % delta rho
-B_n        = s0^(1-n)/eta0NS;       % compliance dislocation
-B_d        = 1/(2.*eta0DS);         % compliance diffusion
-ec         = (B_n*s0^n+B_d*s0);   % characteristic strain rate
-tc         = 1/ec             ;   % characteristic time scale
+drho       = 2*s0/(9.81*l0);             % delta rho
+B_n        = s0^(1-n)/eta0NS;            % compliance dislocation
+B_d        = 1/(2.*eta0DS);              % compliance diffusion
+ec         = (B_n*s0^n+B_d*s0);          % characteristic strain rate
+tc         = 1/ec             ;          % characteristic time scale
 etaS_eff   = (1/eta0NS+1/(eta0DS))^(-1); % effective viscosity of the slab at reference condition
-Psi        = eta0DM/etaS_eff;    % ratio between the upper mantle viscosity and the slab viscosity
+Psi        = eta0DM/etaS_eff;            % ratio between the upper mantle viscosity and the slab viscosity
 % Alpha
-alpha      = 5.0;               % Ancient parameter derived by Yanick et al. 1986
-s          = 1000e3;%1000e3*1.5;                    
-len        = l0/(2*s);                     % Length divided by a characteristic lenght scale (i.e. size of my model)
-Lambda     = len*alpha*Psi;             % Parameter derived by 2D numerical simulation
-B_n_um     = (s0^(1-n))/(2*eta0NM);
-ID.eta_CF = 1e18; % switch to 1.0 when the use wants to not deal with it. 
+alpha      = 5.0;                        % Ancient parameter derived by Yanick et al. 1986
+s          = 1000e3;                     % Convective length scale                   
+len        = l0/(2*s);                   % Length divided by a characteristic lenght scale (i.e. size of my model)
+Lambda     = len*alpha*Psi;              % Parameter derived by 2D numerical simulation
+B_n_um     = (s0^(1-n))/(2*eta0NM);      % B_n of the upper mantle (in case the problem is non linear)
+ID.eta_CF = 1e18;                        % switch to 1.0 when the use wants to not deal with it. 
 ID.B_D_C      = 1./(2.*ID.eta_CF);
 ID.nlm  = nlm;
 ID.cut_off_Slab = 0.0; 
@@ -99,6 +97,7 @@ for is = 1:numel(string_ID)
     end
 
 end
+% Non dimensionalization of the the initial input
 ID.ID_A = Compute_slab_Adimensionals_IV(ID);
 
 if nargin == 0 || nargin == 1
@@ -154,10 +153,9 @@ ID_A.eta_CF = ID.eta_CF/(ID.s0*ID.tc);
 ID_A.Df_UM  = ID.Df_UM;
 ID_A.Df_S   = ID.Df_S; 
 ID_A.B_D_C = B_dC; 
-ID_A.eta0DS = ID.eta0DS./(ID.s0*ID.tc);
-ID_A.fetch(1)  = 0.0; 
-ID_A.fetch(2)  = 1.0; 
-ID_A.cut_off_Slab = 0.0; 
-ID_A.cut_off_Mantle = 0.0; 
-
+ID_A.eta0DS = ID.eta0DS./(ID.s0*ID.tc); 
+ID_A.fetch(1)  = 0.0;      % fitting parameter 1
+ID_A.fetch(2)  = 1.0;      % fitting parameter 2
+ID_A.cut_off_Slab = 0.0;   % Activation flag of the viscosity cut off slab
+ID_A.cut_off_Mantle = 0.0; %Activation flag of the viscosity cut off upper mantle
 end

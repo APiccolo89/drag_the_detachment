@@ -32,7 +32,7 @@ classdef Mantle_Unit_Properties
          function [Cd,Cn,phi] = Compute_Cd_Cn(obj,Pr,Vn,Vd,Tp)
              %UNTITLED2 Construct an instance of this class
              %   Detailed explanation goes here
-            phi = obj.alpha./(obj.rho*obj.Cp);
+            phi = 0.0;%obj.alpha./(obj.rho*obj.Cp);
             Cn = (obj.En*phi-Vn*(1-phi*Pr))/(obj.R*Tp);
             Cd = (obj.Ed*phi-Vd*(1-phi*Pr))/(obj.R*Tp);
          end

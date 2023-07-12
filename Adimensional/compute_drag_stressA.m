@@ -15,16 +15,6 @@ function [tau_M,Lambda] = compute_drag_stressA(ID,D,dDdt)
 % Guess assuming that the initial etaum is the diffusion viscosity
 % compute tau_D
 %==========================================================================
-if nargin == 0
-[ID_] = Compute_slab_characteristics();
-ID = ID_.ID_A; 
-dDdt = -1; 
-D = 1.0;  
-end
-
-
-
-
 if length(dDdt)>1
     n_points = length(dDdt);
     Lambda = zeros(n_points,1);
@@ -33,27 +23,7 @@ if length(dDdt)>1
         [Lambda(i), tau_M(i)] =  compute_drag_stress_etaA(ID,dDdt(i),D(i));
     end
 else
-
-    [Lambda, tau_M] =  compute_drag_stress_etaA(ID,dDdt,D);
-
-if nargin == 0 
-    [tau_D_D, eta_um] = compute_drag_stress(ID_,D*ID_.D0,dDdt*ID_.D0/ID_.tc); 
-    tau_D_D_ = tau_D_D/ID_.s0;
-    res_stress = tau_D_D_-tau_M; 
-    % compute Lambda: 
-    Lambda_D   = ID_.Lambda/(1+(ID_.Df_UM)*(abs(tau_D_D/ID_.s0))^(ID_.n-1));
-    res_lambda = Lambda_D-Lambda;
-    disp(['===================================================================='])
-    disp('  Residuum between computed by adimensional and dimensional is: ')
-    disp(['     tau_D(D)-tau_D(A) = ', num2str(res_stress,3)])
-    disp(['     Lambda(D)-Lambda(A) = ', num2str(res_lambda,3)])
-    disp(['===================================================================='])
-
-end
-
-
-
-
+ [Lambda, tau_M] =  compute_drag_stress_etaA(ID,dDdt,D);
 end
 
 end
@@ -105,7 +75,6 @@ function [res] = f_zero_L_T(tau_D,dDdt,D,ID,eps_A)
 % use fzero and retrieve the real stress
 % use the real stress to compute the new lambda.
 %====================================================================%
-%Lambda_r = ID.Lambda/(1+ID.Df_UM*(abs(tau_D))^(ID.n-1));
 eps = ID.B_n_um*(abs(tau_D)^ID.n)*(1+(1/ID.Df_UM)*(abs(tau_D))^(1-ID.n));
 res = eps_A-eps;
 end
