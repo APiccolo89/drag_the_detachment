@@ -1,0 +1,23 @@
+% Rude collection of data 
+
+
+Vnv = [8 12 15].*1e-6; 
+first_linear_max = small_function(10.82,15.67); 
+first_linear_min = small_function(0,15.67); 
+second_linear_max = small_function(22.82,32.81);
+second_linear_min = small_function(0,32.81); 
+
+
+
+
+
+
+function [mean_velocity] = small_function(t_in,t_fin)
+t_in = t_in.*1e6;
+t_fin = t_fin.*1e6;
+L = 1200*1000*100; 
+mean_velocity = L./(t_fin-t_in);
+
+
+
+end

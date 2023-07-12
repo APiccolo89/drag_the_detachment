@@ -54,24 +54,21 @@ function [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D)
 % => Divided the necessary variable, introduce an intermediate variable to
 % avoid bug. 
 %==========================================================================
-n      = ID_A.n; 
-xium   = ID_A.Df_UM; 
-D0     = 1.0; 
-alpha  = ID_A.alpha; 
-s      = ID_A.s; 
-gamma2 = (D0*alpha)./(s);
+n      = ID_A.n;         %stress exponent
+xium   = ID_A.Df_UM;     %xium
+D0     = 1.0;            %D0
+alpha  = ID_A.alpha;     %alpha
+s      = ID_A.s;         %convective length scale
+theta = (D0*alpha)./(s); %geometric parameter
 n_cor    = (n-1)./n; 
-temporary_var = 1+xium.*(gamma2.*(D0./D).^2.*abs(dDdt)).^n_cor;
+temporary_var = 1+xium.*(theta.*(D0./D).^2.*abs(dDdt)).^n_cor;
 eta_um    = ID_A.eta0DM./temporary_var; 
-if eta_um >1000 
-    bla = 0;
+
+if eta_um < ID_A.eta_CF & ID_A.cut_off_Mantle >0.0
+    Lambda     = ID_A.Lambda./ID_A.eta0DM;
+    Lambda     = Lambda.*ID_A.eta_CF; 
+    eta_um    = ID_A.eta_CF;
+else
+    Lambda        = ID_A.Lambda./temporary_var; 
 end
-    if eta_um < ID_A.eta_CF & ID_A.cut_off_Mantle >0.0
-        Lambda     = ID_A.Lambda./ID_A.eta0DM;
-        Lambda     = Lambda.*ID_A.eta_CF; 
-        eta_um    = ID_A.eta_CF;
-    else
-    
-        Lambda        = ID_A.Lambda./temporary_var; 
-    end
 end
