@@ -29,16 +29,16 @@ function [Tests] = Run_Simulations(D0_v,l0_v,eta0DS_v,DfS_v,n,s0_v,eta0DM_v,DfM_
 if nlm.islinear 
     DfM_v = 0; 
 end
+% Create the matrix of the test
 [ium,iut0,iuet0,iuL0,iuDfS,iuDfM,iuD0]=ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,DfS_v,DfM_v,D0_v);
 tic
 n_tests = length(ium(:));
 disp(['=============================================================='])
-
 disp(['Number of tests is ',num2str(n_tests)])
 disp(['=============================================================='])
 
-pause(3)
 for i=1:n_tests
+    % Extract data for the test
     T_name   = strcat('T_',num2str(i));
     eta0DM   = ium(i);
     s0       = iut0(i);
@@ -47,13 +47,9 @@ for i=1:n_tests
     xiUS     = iuDfS(i);
     xiUM     = iuDfM(i);
     D0       = iuD0(i);
-  %  try
-        [Temp]   = Processing_simulation(eta0DS,xiUS,n,l0,s0,D0,eta0DM,Benchmark,xiUM,nlm);
+    
+    [Temp]   = Processing_simulation(eta0DS,xiUS,n,l0,s0,D0,eta0DM,Benchmark,xiUM,nlm);
    
-%catch 
- %       disp([num2str(i),'out of',num2str(ntests), 'tests'])
-  
-%end
     Tests.(T_name)=Temp;
     
     disp([num2str(i),'out of',num2str(n_tests), 'tests'])

@@ -108,6 +108,7 @@ for i=1:length(n_v)
     name_tests= strcat('Tests_n_',num2str(n));
     % Function to run the ensamble of test
     [Tests] = Run_Simulations(D0_v,l0_v,eta0DS_v,xiUS_v,n,s0_v,eta0DM_v,xiUM_v,Benchmark,nlm);
+    % Update the test structure
     T.(strcat('n_',num2str(floor(n))))= Tests;
     Tests = [];
 end

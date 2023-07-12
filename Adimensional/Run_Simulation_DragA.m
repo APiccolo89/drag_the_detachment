@@ -48,7 +48,9 @@ function [res] = compute_dragODEA(D,dDdt,ID_A,nlm)
     %======================================================================
     % Compute the effective stress 
     [tau_eff,tau_B,tau_D]         = Compute_Effective_StressA(D,dDdt,ID_A,nlm);
+    % Compute the strain rate
     [epsilon_eff,eps_dif,eps_dis] = Compute_StrainA(ID_A,tau_eff);
+    % Necking rate equation
     res                           = -D*(epsilon_eff)-dDdt;
 end
 % Event detection (not difficult, though, i just copied the matlab help
