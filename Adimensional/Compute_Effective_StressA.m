@@ -24,7 +24,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
         tau_D = +ID_A.Lambda.*tau_B.^3.*ID_A.fetch(2).*dDdt;  % Compute drag stress linear
     else
         %compute alternative lambda using dDdt 
-        [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D);    %Compute Lambda non linear
+        [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D,nlm);    %Compute Lambda non linear
         tau_D = Lambda.*tau_B.^3.*dDdt.*ID_A.fetch(2);       % compute drag stress
     end
     tau_eff = tau_fetch.*(tau_B-(abs(tau_D)));
@@ -44,7 +44,7 @@ function varargout = Compute_Effective_StressA(D,dDdt,ID_A,nlm)
 end
 
 
-function [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D)
+function [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D,nlm)
 %==========================================================================
 %Input: ID_A structure with the non dimensionalised parameter
 %       dDdt non dimensionalised necking rate
@@ -56,13 +56,27 @@ function [Lambda,eta_um] = Compute_Lambda_re(ID_A,dDdt,D)
 %==========================================================================
 n      = ID_A.n;         %stress exponent
 xium   = ID_A.Df_UM;     %xium
-D0     = 1.0;            %D0
-alpha  = ID_A.alpha;     %alpha
-s      = ID_A.s;         %convective length scale
-theta = (D0*alpha)./(s); %geometric parameter
-n_cor    = (n-1)./n; 
-temporary_var = 1+xium.*(theta.*(D0./D).^2.*abs(dDdt)).^n_cor;
-eta_um    = ID_A.eta0DM./temporary_var; 
+ D0     = 1.0;            %D0
+ alpha  = ID_A.alpha;     %alpha
+ s      = ID_A.s;         %convective length scale
+ theta = (D0*alpha)./(s); %geometric parameter
+ n_cor    = (n-1)./n; 
+ eps_tot=(theta.*(D0./D).^2.*abs(dDdt)); 
+ temporary_var = 1+xium.*(theta.*(D0./D).^2.*abs(dDdt)).^n_cor;
+ eta_um    = ID_A.eta0DM./temporary_var; 
+ if nlm.iteration==1
+    tau_trial = 2*eps_tot*eta_um;
+
+
+
+
+ end
+
+
+
+
+
+
 
 if eta_um < ID_A.eta_CF & ID_A.cut_off_Mantle >0.0
     Lambda     = ID_A.Lambda./ID_A.eta0DM;
@@ -72,3 +86,18 @@ else
     Lambda        = ID_A.Lambda./temporary_var; 
 end
 end
+
+% function 
+function [res] = compute_tau_mantle(ID,eps,tau)
+
+    B_n_m = ID.B_n_um;
+    B_d_m = 1./(2*ID.eta0DM);
+    n     = ID.n; 
+    if nlm.cut_off == 0
+        res = eps-(B_d_m*tau+B_n_m*tau^n);
+    else
+        B_d_u = ID_A.B_D_upper; 
+        res = eps-(B_d_m*tau+B_n_m*tau^n+ID_A.B_D_upper);
+    end
+end
+

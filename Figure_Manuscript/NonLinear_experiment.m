@@ -24,6 +24,8 @@ size_picture = [12,12.5];
 LineWidth = 1.0; 
 marker_size = 10;
 folder   = '../../Manuscript/';
+load('..\Utilities\ScientificColourMaps8\lipari\lipari.mat');
+
 % Compute before hand the t_diff to filter the experiment 
 t_diff = 80e3^2./1e-6;
 % call the classes that handle the Data structures to have the data that
@@ -42,12 +44,12 @@ fun_0D = Manuscript_function_Container;
 % Function that creates the data structure with the relevant information
 % for the picture at hand 
 [Fig1_A]=fun_0D.select_tests_prepare_variables(n_3,0,'time_nd','tau_eff','Lambda','NonLinear',3,'xius');
-[Fig1_B]=fun_0D.select_tests_prepare_variables(n_3,0,'D_norm','tau_eff','Lambda','NonLinear',3,'xius');
+[Fig1_B]=fun_0D.select_tests_prepare_variables(n_3,0,'time_nd','tau_eff','Lambda','NonLinear',3,'xius');
 [Fig1_C]=fun_0D.select_tests_prepare_variables(n_3,0,'dDdt','tauD_B','Lambda','NonLinear',3,'xius');
 
 
 %%
-cmap        = colormap(crameri('berlin')); 
+cmap        = colormap(lipari); 
 % folder picture
 % figure_folder = 'figure_3';
 % supplementary_folder = 'figure_3_SUP'; 
@@ -68,21 +70,28 @@ set(gcf, 'Units','centimeters', 'Position', [0, 0, size_picture(1),size_picture(
 ax_2 = axes; 
 % First part
 ax_2.Box = 'on';
-a = squeeze(Fig1_B(1,:,:));
-b = squeeze(Fig1_B(2,:,:));
-c = squeeze(Fig1_B(3,:,:));
-color_lists = fun_0D.color_computation(size_tests,c,-6,0);
+a = squeeze(Fig1_A(1,:,:));
+b = squeeze(Fig1_A(2,:,:));
+c = squeeze(Fig1_A(3,:,:));
+d = squeeze(Fig1_A(4,:,:));
+color_lists = fun_0D.color_computation(size_tests,c,-2,0);
 
 for i = 1:length(c(1,:))
     hold on 
     aa = a(:,i);
     bb = b(:,i);
     cc = c(:,i);
-    aa = 1-aa(~isnan(aa));
+    dd = d(:,i);
+    aa = aa(~isnan(aa));
     bb = bb(~isnan(aa));
     cc = cc(~isnan(aa));
+    dd = dd(~isnan(dd));
     hold on
-    p2(i)=plot(aa,bb,'Color',cmap(color_lists(i),:),'LineWidth',LineWidth);
+    if dd(1)>1
+        p2(i)=plot(aa,bb,'Color',cmap(color_lists(i),:),'LineWidth',LineWidth);
+    else 
+        p2(i) = plot(aa,bb,'Color',cmap(color_lists(i),:),'LineWidth',LineWidth*0.8,'LineStyle','--');
+    end
 end
 ax_2.TickLabelInterpreter = 'latex';
 ax_2.LineWidth = LineWidth; 
@@ -104,28 +113,31 @@ ax_2.YGrid    = 'on';
 ax_2.YLabel.Interpreter = 'latex';
 ax_2.YLabel.FontWeight = 'bold'; 
 ax_2.YScale = 'log'; 
+ax_2.XScale = 'log'; 
+ax_2.XLim = [0.01,40];
+
 % Labels,Scales
 ax_2.XLabel.String = '$1-D^{\dagger}$'; 
 ax_2.YLabel.String = '$\tau^{\dagger}_{eff}$'; 
 c    = colorbar(gca,'southoutside');
 c.Label.Interpreter = 'latex';
 c.Label.String = '$log_{10}\left(\frac{\Lambda}{1+\xi^{\mathrm{UM}}}\right)$';
-c.Limits = [-6,0];
-Ticks =  [-6:1:0];
+c.Limits = [-2,0];
+Ticks =  [-2:1:0];
 
-Tickslabel = {'{-6}$','${-5}$','${-4}$','${-3}$','$-2$','${-1}$','$0$'};
+Tickslabel = {'$-2$','${-1}$','$0$'};
 c.Ticks = Ticks;
 c.TickLabelInterpreter = 'latex';
 c.TickLabels = Tickslabel;
 c.FontSize = font_axes; 
 c.Color    = [0,0,0];
-caxis([-6,0]); 
+caxis([-2,0]); 
 
 filename = 'Figure_3_A';
 if not(isdir(folder_save))
     mkdir(folder_save);
 end
-pt=fullfile(folder_save,filename);
+pt=fullfile(filename);
 set(gcf,'Color','w')
 
 print(pt,'-r600','-dpng')

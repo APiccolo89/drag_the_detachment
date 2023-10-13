@@ -63,7 +63,10 @@ ptsave = ['../Tests_Results_LINEAR'];
 if not(isfolder(ptsave))
     mkdir(ptsave)
 end
-nlm       = Problem_type.NonLinear;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+nlm = Problem_type;
+nlm.Linear=0;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+nlm.iteration = 1;
+nlm.cut_off   = 1; 
 if nlm.islinear == 1
     ptsave = ['../Tests_Results_LINEAR'];
 
@@ -93,7 +96,7 @@ if nlm.islinear==0
     % Slab Rheology
     eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
     xiUS_v     = 10.^[2,4,6,8,10];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
-    n_v        = [3.5,5.0];            % [n.d.] pre-exponential factor
+    n_v        = [3.5];            % [n.d.] pre-exponential factor
     % Upper Mantle
     eta0DM_v  = 10.^[21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
     xiUM_v    = 10.^[-2,-1,0,1,2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
@@ -130,7 +133,7 @@ if nlm.islinear == 1
     number_tests = length(nTv(:)); 
     initial_vectors.number_tests = number_tests; 
 else
-    filename_ = 'NonLinear_Tests_Data_Base_n3.mat';
+    filename_ = 'NonLinear_Tests_Data_Base_n3_iteration.mat';
     [nTv,~] = ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,xiUS_v,xiUM_v,D0_v,n_v);
     number_tests = length(nTv(:)); 
     initial_vectors.number_tests = number_tests; 

@@ -61,7 +61,7 @@ classdef Manuscript_function_Container
                 end
             end
           
-            Tests = ones(3,2000,length(ch)).*nan;
+            Tests = ones(4,2000,length(ch)).*nan;
             for i = 1:length(ch)
                 T = suite.(field_names{ch(i)});
                 disp(T.t_det)
@@ -201,9 +201,11 @@ classdef Manuscript_function_Container
                 elseif strcmp(field3,'Temperature')
                     c = T.Meta_dataReal.T_Slab-273.15; 
                 end
+                d = (a./a).*T.initial_data.Df_UM;
                 Tests(1,1:length(a),i)=a;
                 Tests(2,1:length(b),i)=b;
                 Tests(3,1:length(c),i)=c;
+                Tests(4,1:length(c),i)=d; 
             end
             bla = 0;
         end
