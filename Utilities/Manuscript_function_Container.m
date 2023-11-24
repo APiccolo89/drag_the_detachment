@@ -1,76 +1,83 @@
 classdef Manuscript_function_Container
     methods
-        function [Tests]=select_tests_prepare_variables(obj,suite,xius,field1,field2,field3,linear,lessequalhigh,Value)
+        function [Tests]=select_tests_prepare_variables(obj,suite,xius,field1,field2,field3,linear,lessequalhigh,Value,tau_0mc)
             field_names = fieldnames(suite);
             l = 1;
-            failed = 0; 
-            success = 0; 
+            failed = 0;
+            success = 0;
             for k = 1:length(field_names)
-                if isnan(suite.(field_names{k}).t_det) | ~isreal(suite.(field_names{k}).D_norm)
-                    failed = failed+1; 
+                if isfield(suite.(field_names{k}),'t_det')==0
+                    failed = failed+1;
                 else
-                    success = success+1;
-                    if strcmp(Value,'xium')
-                     buf=suite.(field_names{k}).initial_data.Df_UM;
-                elseif strcmp(Value,'tcVdVn')
-                    Vd =  suite.(field_names{k}).Meta_dataReal.Vd;
-                    Vn =  suite.(field_names{k}).Meta_dataReal.Vn;
-                    buf = suite.(field_names{k}).initial_data.tc./suite.(field_names{k}).initial_data.n;
-                    if Vd>=2.0*10^(-6) && Vd<=10.0*10^(-6)  && Vn >= 10*10^(-6) && Vn <=20*10^-6 && buf<xius 
-                        buf =1;
-                        disp(suite.(field_names{k}).Meta_dataReal.Vd)
-                        disp(suite.(field_names{k}).Meta_dataReal.Vn)
-                        disp(suite.(field_names{k}).Lambda)
-                        disp(suite.(field_names{k}).t_det)
-
+                    if isnan(suite.(field_names{k}).t_det) | ~isreal(suite.(field_names{k}).D_norm)
+                        failed = failed+1;
                     else
-                        buf= 0; 
+                        success = success+1;
+                        if strcmp(Value,'xium')
+                            buf=suite.(field_names{k}).initial_data.Df_UM;
+                        elseif strcmp(Value,'tcVdVn')
+                            Vd =  suite.(field_names{k}).Meta_dataReal.Vd;
+                            Vn =  suite.(field_names{k}).Meta_dataReal.Vn;
+                            buf = suite.(field_names{k}).initial_data.tc./suite.(field_names{k}).initial_data.n;
+                            if Vd>=2.0*10^(-6) && Vd<=10.0*10^(-6)  && Vn >= 10*10^(-6) && Vn <=20*10^-6 && buf<xius
+                                buf =1;
+                                disp(suite.(field_names{k}).Meta_dataReal.Vd)
+                                disp(suite.(field_names{k}).Meta_dataReal.Vn)
+                                disp(suite.(field_names{k}).Lambda)
+                                disp(suite.(field_names{k}).t_det)
+
+                            else
+                                buf= 0;
+                            end
+                        else
+                            buf=suite.(field_names{k}).initial_data.Df_S;
+                        end
+                        buf2 = suite.(field_names{k}).D_norm;
+                        if isreal(buf2)==0
+                            bla=0;
+                        end
+                        if strcmp(Value,'tcVdVn')
+                            if buf == 1
+                                ch(l) = k;
+                                l = l+1;
+                            end
+                        else
+                            if lessequalhigh==1
+                                if buf == xius && isreal(buf2)
+                                    ch(l) = k;
+                                    l = l+1;
+                                end
+                            elseif lessequalhigh==2
+                                if buf <= xius && isreal(buf2)
+                                    ch(l) = k;
+                                    l = l+1;
+                                end
+
+                            else
+                                if buf >= xius && isreal(buf2)
+                                    ch(l) = k;
+                                    l = l+1;
+                                end
+                            end
+                        end
+
                     end
-                else
-                    buf=suite.(field_names{k}).initial_data.Df_S;
-                end
-                buf2 = suite.(field_names{k}).D_norm;
-                if isreal(buf2)==0
-                    bla=0;
-                end
-                if strcmp(Value,'tcVdVn')
-                    if buf == 1
-                       ch(l) = k;
-                        l = l+1;
-                    end
-                else
-                if lessequalhigh==1
-                    if buf == xius && isreal(buf2)
-                        ch(l) = k;
-                        l = l+1;
-                    end
-                elseif lessequalhigh==2
-                     if buf <= xius && isreal(buf2)
-                        ch(l) = k;
-                        l = l+1;
-                     end
-                
-                else 
-                     if buf >= xius && isreal(buf2)
-                        ch(l) = k;
-                        l = l+1;
-                     end
-                end
-                end
-                
                 end
             end
-          
+
             Tests = ones(4,2000,length(ch)).*nan;
             for i = 1:length(ch)
                 T = suite.(field_names{ch(i)});
+                if ~isempty(tau_0mc)
+                    tau_0_m = tau_0mc(ch(i));
+                end
                 disp(T.t_det)
                 if strcmp(field1,'time_nd')
                     a = T.time.*T.initial_data.n;
-                    if strcmp(field2,'Drag') |strcmp(field2,'Psi2') 
+                    if strcmp(field2,'Drag') |strcmp(field2,'Psi2')
                         a = a(2:1:end)./2+a(1:1:end-1)./2;
                     end
-                    
+
                 elseif strcmp(field1,'time')
                     a = T.time.*T.initial_data.tc./(365.25.*60.*60.*24.*1e6);
                 elseif strcmp(field1,'dDdt') | strcmp(field2,'dDdt')
@@ -103,7 +110,7 @@ classdef Manuscript_function_Container
                 elseif strcmp(field2,'Drag')
                     % dD
                     eps = T.eps(1,:)';
-                    if T.initial_data.Df_UM > 0.0 
+                    if T.initial_data.Df_UM > 0.0
                         b = abs((eps.*T.Lambda.*(1./T.D_norm)));
                     else
                         b = abs((eps.*T.initial_data.Lambda.*(1./T.D_norm)));
@@ -120,13 +127,13 @@ classdef Manuscript_function_Container
                     % Computation v_stokes [Valid only for non linear case, and I use the reference viscosity of the mantle]
                     g_nd = 9.81.*((T.initial_data.tc.^2)./T.initial_data.D0);
                     drho_nd = (2)./(g_nd.*T.initial_data.l0./T.initial_data.D0);
-                    if T.initial_data.Df_UM > 0.0 
+                    if T.initial_data.Df_UM > 0.0
                         eta_um  = T.initial_data.ID_A.eta0DM./(T.initial_data.Df_UM);
                     else
                         eta_um  = T.initial_data.ID_A.eta0DM;
                     end
                     v_s     = (g_nd.*1.0*(T.initial_data.l0./T.initial_data.D0).*drho_nd)./(eta_um);
-                    b = b./v_s; 
+                    b = b./v_s;
                 elseif strcmp(field2,'Lambda_r')
                     b = T.Lambda;
                 elseif strcmp(field2,'dDdt')
@@ -142,7 +149,7 @@ classdef Manuscript_function_Container
                     a2 = T.D_norm;
                     a11 = diff(T.time);
                     a22 = diff(T.D_norm);
-                    a33 = diff(a22); 
+                    a33 = diff(a22);
                     a44 = diff(a11);
                     a2 = a2(2:1:end)+a2(1:1:end-1);
                     a2 = a2./2;
@@ -156,14 +163,14 @@ classdef Manuscript_function_Container
                     etaum=T.eta_um;
                     etaus=T.initial_data.ID_A.eta0DS./(1+T.initial_data.Df_S);
                     len=T.initial_data.len*5;
-                    b = etaum./etaus; 
+                    b = etaum./etaus;
                     b = b;%./(T.initial_data.Psi./(1+T.initial_data.Df_UM));
-                    
+
                 elseif strcmp(field2,'Psi2')
                     etaum=T.eta_um;
                     etaus=T.initial_data.ID_A.eta0DS./(1+T.initial_data.Df_S);
                     len=T.initial_data.len*5;
-                    b = etaum./etaus; 
+                    b = etaum./etaus;
                     a1 = T.time;
                     a2 = T.D_norm;
                     a11 = diff(T.time);
@@ -173,23 +180,35 @@ classdef Manuscript_function_Container
                     b2 = abs(a11./a22);
                     b3 = b2.*(1./len).*a2.^2;
                     b  = b(2:1:end)+b(1:1:end-1);
-                    b = b./2; 
-                    b = b./b3; 
-                    elseif strcmp(field2,'etaum')
+                    b = b./2;
+                    b = b./b3;
+                elseif strcmp(field2,'etaum')
                     b=T.eta_um;
-                  
+                elseif strcmp(field2,'tau_M')
+                    
+                    b = T.tau_mantle;
+
+                elseif strcmp(field2,'xdisl')
+                    b = T.eps_mantle(1,:)./(T.eps_mantle(3,:));
                 end
+
+
                 if strcmp(field3,'none')
                     c = zeros(length(a),1);
-                elseif strcmp(field3,'xium') 
-                    c = (a./a).*T.initial_data.Df_UM./T.initial_data.Df_S; 
+                elseif strcmp(field3,'xium')
+                    c = (a./a).*T.initial_data.Df_UM;
+                elseif strcmp(field3,'Psi')
+                    c = (a./a).*T.initial_data.Psi;
                 elseif strcmp(field3,'Lambda')
-                    if strcmp(linear,'Linear') == 0
-                        c1 = T.initial_data.Lambda./(1+T.initial_data.Df_UM);
-                    else
+                 
                         c1 = T.initial_data.Lambda;
-                    end
+                    
                     c  = (a./a)*c1;
+                elseif strcmp(field3,'Lambda_c')
+                    c1 = T.initial_data.Lambda./(1+T.initial_data.Df_UM.*tau_0_m.^(T.initial_data.n-1));
+                    c  = (a./a)*c1;
+                elseif strcmp(field3,'Lambda0')
+                    c = (a./a).*T.Lambda(1);
                 elseif strcmp(field3,'tau_B')
                     c = T.tau(1,:);
                 elseif strcmp (field3,'cdcn')
@@ -199,20 +218,24 @@ classdef Manuscript_function_Container
                     expCn = ((-Cn.*T.Meta_dataReal.w.*T.initial_data.l0)./T.Meta_dataReal.phi);
                     c     = (a./a).*(Cd./Cn).*expCd./expCn;
                 elseif strcmp(field3,'Temperature')
-                    c = T.Meta_dataReal.T_Slab-273.15; 
+                    c = T.Meta_dataReal.T_Slab-273.15;
                 end
-                d = (a./a).*T.initial_data.Df_UM;
+                try 
+                d = (a./a).*T.initial_data.Psi;
+                catch
+                    d = a./a; 
+                end
                 Tests(1,1:length(a),i)=a;
                 Tests(2,1:length(b),i)=b;
                 Tests(3,1:length(c),i)=c;
-                Tests(4,1:length(c),i)=d; 
+                Tests(4,1:length(c),i)=d;
             end
             bla = 0;
         end
-        
+
         function [color_lists] = color_computation(obj,size_tests,c,z_min,z_max,log)
             if nargin == 5
-                log=1; 
+                log=1;
             end
             V = zeros(size_tests,1);
             for i = 1:size_tests
@@ -230,6 +253,6 @@ classdef Manuscript_function_Container
             end
             color_lists=V;
         end
-        
+
     end
 end

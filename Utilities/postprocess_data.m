@@ -24,10 +24,10 @@ D = 0.5*(D(1:1:end-1)+D(2:1:end));
 t   = 0.5*(t(1:1:end-1)+t(2:1:end));
 
 if nlm.islinear == 0
-[t_eff,t_B,t_D,Lambda,eta_um] = Compute_Effective_StressA(D,dDdt,ID,nlm);
+    [t_eff,t_B,t_D,Lambda,eta_um,eta_um_min,eta_um_MAX,tau_mantle,eps_mantle] = Compute_Effective_StressA(D,dDdt,ID,nlm);
 else
-[t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,nlm);
-eta_um = [];
+    [t_eff,t_B,t_D,Lambda] = Compute_Effective_StressA(D,dDdt,ID,nlm);
+    eta_um = [];
 
 end
 [eps_eff,eps_d,eps_n] = Compute_StrainA(ID,t_eff);
@@ -54,9 +54,14 @@ Testdata.t_t_max = t_t_max;
 Testdata.time_t_M = time_t_M;
 
 Testdata.t_t_det  = Testdata.tau(3,end);
+Testdata.dDdt     = dDdt; 
 if nlm.islinear == 0
     Testdata.Lambda = Lambda;
     Testdata.eta_um  = eta_um;
+    Testdata.eta_um_min = eta_um_min;
+    Testdata.eta_um_MAX = eta_um_MAX;
+    Testdata.tau_mantle = tau_mantle; 
+    Testdata.eps_mantle = eps_mantle; 
 else
     Testdata.Lambda = [];
     Testdata.etaum  = [];

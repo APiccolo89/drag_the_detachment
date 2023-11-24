@@ -5,6 +5,8 @@ close all;
 clear all;
 clf;
 addpath ../Utilities
+addpath('../Utilities/Plot_Class/')
+
 tic;
 load('../../Data_Base/Linear_Tests_Data_Base.mat','n_3','Data_S');
 toc;
@@ -16,7 +18,7 @@ font_text   = 5;
 size_shit = [12,12.5];
 LineWidth = 1.0; 
 marker_size = 10;
-folder = '../../Manuscript/'
+folder = '../../Manuscript_additional/'
 figure_folder = 'figure_2';
 supplementary_folder = 'figure_2_SUP'; 
 folder_save=fullfile(folder,figure_folder);
@@ -37,12 +39,30 @@ end
 %%
 fun_0D = Manuscript_function_Container; 
 
-[Fig1_A]=fun_0D.select_tests_prepare_variables(n_3,50.0,'time_nd','tau_eff','Lambda','Linear',1,'xius');
-[Fig1_C]=fun_0D.select_tests_prepare_variables(n_3,50.0,'time_nd','dDdt2','Lambda','Linear',1,'xius');
+[Fig1_A]=fun_0D.select_tests_prepare_variables(n_3,50.0,'time_nd','D_norm','Lambda','Linear',1,'xius',[]);
+[Fig1_C]=fun_0D.select_tests_prepare_variables(n_3,50.0,'time_nd','tau_eff','Lambda','Linear',1,'xius',[]);
 
 %% Figure Karlsruhe Presentation 
-
-
+allowed= Data_S.xiUS>10 & Data_S.n ==3.5; 
+FG1 = scatter_plot_post_process;
+FG1.figure_number = 1; 
+FG1.x = Data_S.Lambda(allowed==1);
+FG1.y = Data_S.tdet(allowed==1);
+FG1.c = Data_S.tau_max(allowed==1);
+FG1.colormap_discrete = 10; 
+FG1.logx = 'log';
+FG1.logy = 'linear';
+FG1.logcolor = 0; 
+FG1.colormap_f = 'bilbao';
+FG1.xlabel = '$\Lambda_0$';
+FG1.ylabel = '$t^{\dagger,-1}_d$';
+FG1.clabel = '${\nu_{M,0}}$';
+FG1.save_path = figure_folder;% ptsave;
+FG1.name_figure = 'Lambda_0_vs_td';
+FG1.size_picture = [12.5,13];
+FG1.clim  = [0.0,10];
+FG1.make_scatter_plot; 
+%%
 
 F3 = figure(1);
 clf; 
@@ -51,8 +71,8 @@ a = squeeze(Fig1_A(1,:,:));
 b = squeeze(Fig1_A(2,:,:));
 c = squeeze(Fig1_A(3,:,:));
 F1C.size_tests = length(squeeze(Fig1_C(1,1,:)));
-color_lists = fun_0D.color_computation(F1C.size_tests,c,-2,0);
-F1C.c_lim = [-2,0];
+color_lists = fun_0D.color_computation(F1C.size_tests,c,-4,0);
+F1C.c_lim = [-4,0];
 hold on
 cmap = colormap(lipari); 
 yline(1.0,'LineWidth',0.9)
@@ -97,17 +117,15 @@ F1C.y.LineWidth = LineWidth;
 F1C.x.MinorTick = 'on';
 F1C.y.MinorTick = 'on';
 F1C.x.Limits = [0.1,40]; 
-%F1C.y.Limits = [0.5,10.0]; 
+F1C.y.Limits = [0.1,1.0]; 
 box on 
- caxis([-2 0])
-grid on
+ caxis([-4 0])
 box on
-F1C.y.Scale = 'log'
-F1C.x.Scale = 'log'
+F1C.y.Scale = 'linear';
+F1C.x.Scale = 'linear';
 filename = 'FigureA';
 
 pt=fullfile(folder_save,filename);
-set(gcf,'Color','w')
 
 
 F1C.c = colorbar(gca,'southoutside');
@@ -124,12 +142,99 @@ F1C.c = colorbar(gca,'southoutside');
 % %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
 % 
 
-set(gcf,'Color','w')
+
+
+print(pt,'-r600','-dpng')
+%%
+F4 = figure(2);
+clf; 
+set(gcf, 'Units', 'centimeters', 'Position', [0, 0, size_shit(1),size_shit(2)], 'PaperUnits', 'centimeters', 'PaperSize', [size_shit(1), size_shit(2)])
+a = squeeze(Fig1_C(1,:,:));
+b = squeeze(Fig1_C(2,:,:));
+c = squeeze(Fig1_C(3,:,:));
+F1C.size_tests = length(squeeze(Fig1_C(1,1,:)));
+color_lists = fun_0D.color_computation(F1C.size_tests,c,-4,0);
+F1C.c_lim = [-4,0];
+hold on
+cmap = colormap(lipari); 
+yline(1.0,'LineWidth',0.9)
+
+for i = 1:length(c(1,:))
+    aa = a(:,i);
+    bb = b(:,i);
+    cc = c(:,i);
+    aa = aa(~isnan(aa));
+    bb = bb(~isnan(aa));
+    cc = cc(~isnan(aa));
+    hold on
+    F1C.p=plot(aa,bb,'Color',cmap(color_lists(i),:),'LineWidth',LineWidth*0.5,'LineStyle','--');
+
+end
+    ind_min = find(c(1,:)>=1e-7,1);
+    ind_mean = find(c(1,:)>=0.05,1);
+    ind_median = find(c(1,:)>=0.5,1);
+
+    F1C.p2=plot(a(:,ind_min),b(:,ind_min),'Color',cmap(color_lists(ind_min),:),'LineWidth',LineWidth*1.2);
+    F1C.p3=plot(a(:,ind_mean),b(:,ind_mean),'Color',cmap(color_lists(ind_mean),:),'LineWidth',LineWidth*1.2);
+    F1C.p4=plot(a(:,ind_median),b(:,ind_median),'Color',cmap(color_lists(ind_median),:),'LineWidth',LineWidth*1.2);
+
+
+%end
+hold off
+
+F1C.x = get(gca,'XAxis');
+F1C.y = get(gca,'YAxis');
+F1C.x.FontSize = font_axes;
+F1C.y.FontSize = font_axes;
+F1C.x.Label.String = '$t^{\dagger}$';
+F1C.x.Label.Interpreter = 'latex';
+F1C.y.Label.String = '$\tau^{\dagger}$';
+F1C.y.Label.Interpreter = 'latex';
+F1C.z.Label.String = '$\Lambda$';
+F1C.z.Label.Interpreter = 'latex';
+F1C.x.Color = [0.0 0.0 0.0];
+F1C.x.LineWidth = LineWidth;
+F1C.y.Color = [0.0 0.0 0.0];
+F1C.y.LineWidth = LineWidth;
+F1C.x.MinorTick = 'on';
+F1C.y.MinorTick = 'on';
+F1C.x.Limits = [0.1,40]; 
+F1C.y.Limits = [0.5,10.0]; 
+box on 
+ caxis([-4 0])
+box on
+F1C.y.Scale = 'log';
+F1C.x.Scale = 'log';
+filename = 'FigureBB';
+
+pt=fullfile(folder_save,filename);
+
+
+F1C.c = colorbar(gca,'southoutside');
+ F1C.c.Label.String = '$log_{10}\left(\Lambda\right)$';
+ F1C.c.Label.Interpreter = 'latex';
+ F1C.c.TickLabelInterpreter = 'latex';
+ F1C.c.FontSize = font_axes; 
+ % Define coloraxis
+ F1C.c.Limits =[F1C.c_lim(1), F1C.c_lim(2)];
+ % min/max are rounded using the log values of Lambda
+ Ticks=round((F1C.c_lim(1))):round((F1C.c_lim(2)));
+ % Produce the tick
+ TickLabels=arrayfun(@(x) sprintf('$10^{%d}$',x),Ticks,'UniformOutput',false);
+% %TickLabels=strrep(strrep(TickLabels,'{',''),'}','');%remove TeX formatting
+% 
+
 
 print(pt,'-r600','-dpng')
 %%
 
-F5=figure(2)
+
+
+
+
+%%
+
+F5=figure(3)
 set(gcf, 'Units', 'centimeters', 'Position', [0, 0, size_shit(1),size_shit(2)], 'PaperUnits', 'centimeters', 'PaperSize', [size_shit(1), size_shit(2)])
 clf;
 a = Data_S.Lambda;
@@ -141,8 +246,8 @@ a = a(c==50.0 & d==3.5);
 b = b(c==50.0 & d==3.5);
 color_marker = color_marker(c==50.0 & d==3.5);
 hold on 
-F1B.p = scatter(a,b,20,[42 137 31]./255,'filled','diamond','MarkerEdgeColor','k');
-F1B.p2 = scatter(a,color_marker,10,[18 136 215]./255,'filled','o','MarkerEdgeColor','k');
+F1B.p = scatter(a,b,50,[42 137 31]./255,'filled','diamond','MarkerEdgeColor','k');
+F1B.p2 = scatter(a,color_marker,50,[18 136 215]./255,'filled','o','MarkerEdgeColor','k');
 
 colormap(crameri('bilbao',10));
 %caxis([0 10.0])
@@ -165,20 +270,19 @@ F1B.x.FontSize=font_axes;
 F1B.y.FontSize=font_axes;
 F1B.x.TickLabelInterpreter = 'latex';
 F1B.y.TickLabelInterpreter = 'latex';
-F1B.x.Label.String = '$log_{10}\left(\Lambda\right)$';
 F1B.x.Label.Interpreter = 'latex';
-F1B.y.Label.String = '$\tau_{eff}^{MAX,\dagger}$';
 F1B.y.Label.Interpreter = 'latex';
 F1B.x.MinorTick = 'on';
 F1B.y.MinorTick = 'on';
-grid on
-grid minor
+grid off
+%%grid minor
 F1B.x.Scale = 'log';
 F1B.y.Scale = 'log';
-l=legend('$\tau^{MAX,\dagger}$','$\tau^{det,\dagger}$');
+l=legend('$\tau^{\dagger}_{Max}$','$\tau^{\dagger}_{det}$');
 l.Interpreter = 'latex';
 set(gca,'Box','on','Layer','top')
-
+F1B.x.TickLabels = [];
+F1B.y.TickLabel = []; 
 
 filename = 'FigureB';
 
@@ -215,7 +319,7 @@ for i =1: length(unique_n)
     ch = xius == c_xi & n == n_p;
     x_p = x(ch==1);
     y_p = y(ch==1);
-    F3A.p(i) = scatter(x_p,y_p,marker_size,'filled');
+    F3A.p(i) = scatter(x_p,y_p,40,'filled');
     F3A.p(i).Marker = marker_type{i};
     F3A.p(i).MarkerFaceColor = color_code{i};
     F3A.p(i).MarkerEdgeColor ='k';
@@ -239,16 +343,17 @@ F3A.x.TickLabels =[];
 F3A.y.LineWidth = LineWidth;
 F3A.y.Color = [0,0,0];
 F3A.y.TickLabelInterpreter = 'latex';
-F3A.y.Label.String = '$t_d^{\dagger}$';
+%F3A.y.Label.String = '$t_d^{\dagger}$';
 F3A.y.Label.Interpreter = 'latex';
 set(gca,'Box','on','Layer','top')
 F3A.x.FontSize = font_axes;
 F3A.y.FontSize = font_axes;
+F3A.x.TickLabels = [];
+F3A.y.TickLabel = []; 
+grid off
+%%grid minor
 
-grid on
-grid minor
-
-filename = 'FigureSB1';
+filename = 'Figure_C';
 
 pt=fullfile(folder_supplementary,filename);
 set(gcf,'Color','w')
@@ -265,7 +370,7 @@ for i =1: length(unique_xius)
     ch = xius == xiup & n == c_n;
     x_p = x(ch==1);
     y_p = y(ch==1);
-    F3B.p(i) = scatter(x_p,y_p,marker_size,'filled');
+    F3B.p(i) = scatter(x_p,y_p,40,'filled');
     F3B.p(i).Marker = marker_type{i};
     F3B.p(i).MarkerFaceColor = color_code{i};
     F3B.p(i).MarkerEdgeColor ='k';
@@ -290,14 +395,16 @@ F3B.x.TickLabels =[];
 F3B.y.LineWidth = LineWidth;
 F3B.y.Color = [0,0,0];
 F3B.y.TickLabelInterpreter = 'latex';
-F3B.y.Label.String = '$t_d^{\dagger}$';
+%F3B.y.Label.String = '$t_d^{\dagger}$';
 F3B.y.Label.Interpreter = 'latex';
 set(gca,'Box','on','Layer','top')
-grid on
-grid minor% Picture as a function of n @ constant xius = 50.0; 
+grid off
+%%grid minor% Picture as a function of n @ constant xius = 50.0; 
 F3B.x.FontSize = font_axes;
 F3B.y.FontSize = font_axes;
-filename = 'FigureSB2';
+F3B.x.TickLabels = [];
+F3B.y.TickLabel = []; 
+filename = 'FigureC';
 
 pt=fullfile(folder_supplementary,filename);
 set(gcf,'Color','w')
@@ -314,7 +421,7 @@ for i =1: length(unique_n)
     ch = xius == c_xi & n == n_p;
     x_p = x(ch==1);
     y_p = 1./y(ch==1);
-    F3C.p(i) = scatter(x_p,y_p,marker_size,'filled');
+    F3C.p(i) = scatter(x_p,y_p,40,'filled');
     F3C.p(i).Marker = marker_type{i};
     F3C.p(i).MarkerFaceColor = color_code{i};
     F3C.p(i).MarkerEdgeColor ='k';
@@ -332,21 +439,23 @@ F3C.x.LineWidth = LineWidth;
 F3C.x.Scale = 'log';
 F3C.x.Color = [0,0,0];
 F3C.x.TickLabelInterpreter = 'latex';
-F3C.x.Label.String = '$\Lambda$';
+%F3C.x.Label.String = '$\Lambda$';
 F3C.x.Label.Interpreter = 'latex';
 %F3B.x.TickLabels =[]; 
 F3C.y.LineWidth = LineWidth;
 F3C.y.Color = [0,0,0];
 F3C.y.TickLabelInterpreter = 'latex';
-F3C.y.Label.String = '$\frac{1}{t_d^{\dagger}}$';
+%F3C.y.Label.String = '$\frac{1}{t_d^{\dagger}}$';
 F3C.y.Label.Interpreter = 'latex';
 F3C.y.Limits = [-0.01 1.1]; 
 F3C.x.FontSize = font_axes;
 F3C.y.FontSize = font_axes;
+F3C.x.TickLabels = [];
+F3C.y.TickLabel = []; 
 
 set(gca,'Box','on','Layer','top')
-grid on
-grid minor
+grid off
+%%grid minor
 filename = 'FigureSB3';
 pt=fullfile(folder_supplementary,filename);
 set(gcf,'Color','w')
@@ -363,7 +472,7 @@ for i =1: length(unique_xius)
     ch = xius == xiup & n == c_n;
     x_p = x(ch==1);
     y_p = 1./y(ch==1);
-    F3D.p(i) = scatter(x_p,y_p,marker_size,'filled');
+    F3D.p(i) = scatter(x_p,y_p,40,'filled');
     F3D.p(i).Marker = marker_type{i};
     F3D.p(i).MarkerFaceColor = color_code{i};
     F3D.p(i).MarkerEdgeColor ='k';
@@ -384,19 +493,21 @@ F3D.x.LineWidth = LineWidth;
 F3D.x.Scale = 'log';
 F3D.x.Color = [0,0,0];
 F3D.x.TickLabelInterpreter = 'latex';
-F3D.x.Label.String = '$\Lambda$';
+%F3D.x.Label.String = '$\Lambda$';
 F3D.x.Label.Interpreter = 'latex';
 %F3B.x.TickLabels =[]; 
 F3D.y.LineWidth = LineWidth;
 F3D.y.Color = [0,0,0];
 F3D.y.TickLabelInterpreter = 'latex';
-F3D.y.Label.String = '$\frac{1}{t_d^{\dagger}}$';
+%F3D.y.Label.String = '$\frac{1}{t_d^{\dagger}}$';
 F3D.y.Label.Interpreter = 'latex';
 F3D.y.Limits = [-0.01 1.1]; 
+F3D.x.TickLabels = [];
+F3D.y.TickLabel = []; 
 set(gca,'Box','on','Layer','top')
-grid on
-grid minor% Picture as a function of n @ constant xius = 50.0; 
-filename = 'FigureSB4';
+grid off
+%%grid minor% Picture as a function of n @ constant xius = 50.0; 
+filename = 'FigureE';
 
 pt=fullfile(folder_supplementary,filename);
 set(gcf,'Color','w')

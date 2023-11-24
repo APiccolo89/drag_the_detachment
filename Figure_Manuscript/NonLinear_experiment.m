@@ -13,7 +13,7 @@ clf;
 addpath ../Realistic_Case/
 addpath ../Utilities/
 % load the data base from the folder of data base
-load('../NonLinear_Tests_Data_Base_n3.mat','n_3','Data_S');
+load('../NonLinear_Tests_Data_Base_n3_iteration.mat','n_3','Data_S');
 
 %%
 % General information about the picture: s
@@ -43,7 +43,7 @@ fun_0D = Manuscript_function_Container;
 %% Figure Main 3
 % Function that creates the data structure with the relevant information
 % for the picture at hand 
-[Fig1_A]=fun_0D.select_tests_prepare_variables(n_3,0,'time_nd','tau_eff','Lambda','NonLinear',3,'xius');
+[Fig1_A]=fun_0D.select_tests_prepare_variables(n_3,0,'time_nd','etaum','Lambda','NonLinear',3,'xius');
 [Fig1_B]=fun_0D.select_tests_prepare_variables(n_3,0,'time_nd','tau_eff','Lambda','NonLinear',3,'xius');
 [Fig1_C]=fun_0D.select_tests_prepare_variables(n_3,0,'dDdt','tauD_B','Lambda','NonLinear',3,'xius');
 
@@ -239,9 +239,13 @@ clf;
 set(gcf, 'Units','centimeters', 'Position', [0, 0, size_picture(1),size_picture(2)], 'PaperUnits', 'centimeters', 'PaperSize', [size_picture(1), size_picture(2)])
 
 allowed = log10(Data_S.xiUM)>0; 
-a = Data_S.Lambda(allowed==1)./(1+Data_S.xiUM(allowed==1)); 
+a = Data_S.Lambda(allowed==1)./(1+((1*5)./(1000/80)).^((Data_S.n(allowed==1)-1)./Data_S.n(allowed==1)).*Data_S.xiUM(allowed==1)); 
+
+%a=Data_S.Psi(allowed==1)./(1+Data_S.xiUM(allowed==1));
+
 b = 1./Data_S.tdet(allowed==1);
-a2 =  Data_S.Lambda(allowed==0)./(1+Data_S.xiUM(allowed==0));
+a2 = Data_S.Lambda(allowed==0)./(1+((1*5)./(1000/80)).^((Data_S.n(allowed==0)-1)./Data_S.n(allowed==0)).*Data_S.xiUM(allowed==0)); 
+%a2 = Data_S.Psi(allowed==0)./(1+Data_S.xiUM(allowed==0));
 b2 = 1./Data_S.tdet(allowed==0);
 
 ax_4 = axes;
@@ -266,7 +270,7 @@ ax_4.YMinorTick = 'on';
 ax_4.YMinorGrid = 'on';
 ax_4.YGrid    = 'on'; 
 ax_4.YLabel.Interpreter = 'latex';
-ax_4.XLim = [10^-5,10^0];
+ax_4.XLim = [10^-10,10^0];
 ax_4.YLim = [0,1.1];
 ax_4.YTickLabel =[];
 ax_4.LineWidth = 1.2; 
@@ -278,8 +282,8 @@ ax_4.YMinorGrid = 'on';
 
 % Labels,Scales
 ax_4.XScale = 'log';
-%ax_4.XLabel.String = '$\frac{\Lambda}{1+\xi^{\mathrm{UM}}}$'; 
-%ax_4.YLabel.String = '$\frac{1}{t^{\dagger}_{\mathrm{d}}}$';
+ax_4.XLabel.String = '$\frac{\Lambda}{1+\xi^{\mathrm{UM}}}$'; 
+ax_4.YLabel.String = '$\frac{1}{t^{\dagger}_{\mathrm{d}}}$';
 
 % Legend 
 l = legend('$log_{10}\left(\xi^{UM}\right) > 0.0$','$log_{10}\left(\xi^{UM}\right) < 0.0$');
@@ -372,7 +376,7 @@ p=pcolor(tau,xium,log10(eta_eff')); colormap(crameri('nuuk',10));shading interp;
 ax.YScale = 'log';
 
 hold on
-xline(1.0,'Color','r',LineWidth=1.0)
+xline(1.0,'Color','r',LineWidth==1.0)
 yline(10,'LineStyle',':','LineWidth',1.2,'Color','k')
 caxis([-10,0])
 ax.XTickLabel = [];

@@ -3,36 +3,81 @@
 clear all;
 close all;
 addpath Adimensional\
+
 addpath Dimensional\
-addpath \Users\'Andrea Piccolo'\Dropbox\freezeColors-master\
+
+
 addpath Utilities\
+
 addpath D0_D2_comparison_function\
+
+
 clear all
+% Matlab version command: It appears that the fitting option where a mess
+% before Matlab 2020, and basically the fitting of certain methods where
+% computed as % fitting and not % of the complement error. This wonderful
+% discrepancy allowed me to spend an entire weekend finding the reason why
+% the code was not working, till, for a chance, I saw the wonderful warning
+% in the matlab website - offcourse, was not evident, and offcourse was at
+% the very end of the page. To avoid further problem, I introduce a version
+% control such that the output is consistent with the current version. I
+% wanted to be extremely lengthy just for documents this issue. 
+matlab_version = version('-release'); 
+matlab_version = str2num(matlab_version(1:4));
+
+
 % Common Data
 D0=80e3;
+
 n=3.5;
+
 Df_S=10;
-nlm = Problem_type.Linear;
-Df_UM = nan;
-DB_path = '../Data_Base/Test_DB2.hdf5';
-pt_save = 'C:\Users\Andrea Piccolo\Dropbox\Bayreuth_Marcel\BasicCode\Viscous_DRAG\Manuscript\Linear_Comparison_fetch';
-file_name_table = 'Linear_Experiments_Table'
+
+nlm = Problem_type;
+
+nlm.Linear=1;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+
+nlm.iteration = 1; % Iterate for the stress
+ 
+nlm.cut_off   = 1; % Introduce cut-off for the upper mantle {must work on the slab}
+
+Df_UM = nan;  % Assume xium = to nan
+
+DB_path = '../Data_Base/Test_DB2.hdf5'; % Database path
+
+pt_save = '..\Viscous_DRAG\Manuscript\New_Fit_Definitive\';
+
+file_name_table = 'Linear_Experiment_Table1';
+
 pt_Table = fullfile(pt_save,file_name_table);
+
 if not(isdir(pt_save))
+
     mkdir(pt_save);
 end
+
+pt_save = fullfile(pt_save,'Fetches_2');
+
+if not(isdir(pt_save))
+
+    mkdir(pt_save);
+end
+
+
 l = h5info(DB_path,'/Viscous/HR');
-%l2 =h5info(DB_path,'/Viscous/LR_');
+
 TestsA  = {l.Groups.Name};
-%TestsB  = {l2.Groups.Name};
+
 HR = 1:length(TestsA);
-%LR = -(1:length(TestsB));
+
 Res = [HR];
+
 Tests   = [TestsA];
 
-[TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,1);
+[TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,1,matlab_version);
 
-LN_ALT = struct("TB",TB,"FIT",FIT);
+NLN_fetches1 = struct('TB',TB,'FIT',FIT);
+
 [Table,L,td_rel_E]=Create_Table_Latex(TB,Res,0,pt_Table);
 
-save('Data_Base_Fit.mat',"LN_ALT",'-append');
+save('Data_Base_Fit.mat','NLN_fetches1','-append');

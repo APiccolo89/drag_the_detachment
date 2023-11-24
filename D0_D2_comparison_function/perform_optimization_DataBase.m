@@ -1,32 +1,46 @@
-function [TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,number_fetch)
+function [TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,number_fetch,matlab_version)
 
 suc = 1;
 
 for ktest=1:1:length(Tests)
+
     time_A = cputime;
+
     Chosen = Tests{ktest};
+
     [P_Var,D,t,Tau,d,tdet,topo,tauL,d2,D_matrix] = Reading_Data_Base(Chosen,DB_path,Df_S,nlm);
+
     [ID] = Compute_slab_characteristics(P_Var.eta0DS,Df_S,n,P_Var.L0,P_Var.s0,D0,P_Var.eta0DM,P_Var.xiUM,nlm);
 
     % Example
     if P_Var.failed == 0
         type =1;
+
         ID.ID_A.cut_off_Mantle = 1.0;
+
         ID.ID_A.cut_off_Slab   = 1.0;
+
         ID.ID_A.iteration      = 0;
+
         ID.ID_A.flag =0;
+
         if ktest == 1
+
             test_Gif = 1;
         else
+
             test_Gif = 0;
         end
         if number_fetch == 1
-            f = [abs(double(d./2))];
 
+            f = [abs(double(d./2))];
         else
+
             f = [abs(double(d./2)),abs(1)];
         end
-        fun      = @(x) optimizing_fit(ID,nlm,x,D,t,tdet,type,test_Gif,number_fetch);
+
+        fun      = @(x) optimizing_fit(ID,nlm,x,D,t,tdet,type,test_Gif,number_fetch,matlab_version);
+        res_gf = [];
         if type == 2
             f    = fsolve(fun,f);
             ID.ID_A.flag = 1;
@@ -35,7 +49,10 @@ for ktest=1:1:length(Tests)
             end
             [TestData] = Run_Simulation_DragA(ID.ID_A,nlm);
             [D,D_0D2D,t] = clean_data(TestData,real(D),t);
+            res_gf = goodnessOfFit(D,D_0D2D,'NMSE');
+
             res = (tdet-TestData.t_det.*ID.n)./tdet;
+
         else
             f    = fminsearch(fun,f);
             ID.ID_A.flag = 1;
@@ -45,12 +62,17 @@ for ktest=1:1:length(Tests)
             [TestData] = Run_Simulation_DragA(ID.ID_A,nlm);
             [D,D_0D2D,t] = clean_data(TestData,real(D),t);
             res = goodnessOfFit(D,D_0D2D,'NRMSE');
+            res_gf = res;
+        end
+        if matlab_version<=2020
+            disp(['The test @ node ', Chosen, ' show a ',num2str((1-res_gf)*100), ' % fit'])
+        else
+            disp(['The test @ node ', Chosen, ' show a ',num2str((res_gf)*100), ' % fit'])
+
         end
 
-        disp(['The test @ node ', Chosen, ' show a ',num2str(res*100), ' % fit'])
-
         if nlm.islinear == 0
-            FIT.Lambda(suc)=ID.ID_A.Lambda./P_Var.xiUM;
+            FIT.Lambda(suc)=ID.ID_A.Lambda./(1+P_Var.xiUM.*ID.ID_A.tau_mc.^(ID.n-1));
         else
             FIT.Lambda(suc)=ID.ID_A.Lambda;
         end
@@ -75,13 +97,26 @@ for ktest=1:1:length(Tests)
         FIT.Detachment(1,suc) = n*TestData.t_det;
         FIT.Detachment(2,suc) = tdet;
         FIT.Res(suc)= Res(ktest);
+        FIT.res_gf(suc)=res_gf;
         Detachment_0D = n*TestData.t_det;
         Detachment_2D = tdet;
         tau0D = TestData.tau;
         t0D   = TestData.time;
 
         suc = suc+1;
-
+  
+        if number_fetch >1
+            figure(3);
+            ax = gca;
+            ax.XColor = [0,0,0];
+            ax.YColor = [0,0,0];
+            ax.LineWidth = 1.2;
+            ax.Box     = 'on';
+            filename=(['T_2f',num2str(ktest),'.png']);
+            pt = fullfile(pt_save,filename);
+            print(pt,'-dpng','-r0')
+            clf;
+        end
     else
         disp('=====================================================================')
         disp(['You cannot optimize a failure, but, i can give you motivational tips:'])

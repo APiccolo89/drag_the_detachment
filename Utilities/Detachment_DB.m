@@ -4,35 +4,49 @@ classdef Detachment_DB < handle
     % Methods 1: initializate the vectors (input the number of tests)
 
     properties
-        L0           % Initial Length
-        D0           % Initial Thickness
-        tau0         % Reference Stress
-        n            % Stress exponent
-        eta0DS       % Reference diffusion creep viscosity Slab
-        eta0DUM      % Reference diffusion creep viscosity Upper Mantle
-        xiUM         % Viscosity contrast between diffusion and dislocation at reference condition of the upper mantle
-        xiUS         % Viscosity contrast between diffusion and dislocation at reference condition of the Slab
-        eps_c        % Characteristic strain rate
-        Lambda       % Initial Lambda
-        Psi          % Viscosity contrast at reference condition between mantle and slab 
-        s            % Length scale of the convection
-        tc           % Characteristic timescale 
-        tc_drag      % Characteristic timescale using the drag stress
-        tdet         % Detachment time (t/tc)
-        tau_det      % tau at the detachment 
-        tau_max      % tau max 
-        time_tau_max % time at which the tau max is happening
-        tau_real_initial % initial stress at the initial stage
-        tau_drag_initial % initial drag stress 
-        T_Slab % Field that is useful for the realistic case: the average temperature of the slab in Kelvin
-        Tp    % Mantle potential temperature
-        Vn    % Activaction volume 
-        Vd    % Activaction volume 
-        Cd    % Exponential factor diffusion
-        Cn    % Exponential factor dislocation
-        phi   % adiabatic gradient
-        w     % weight force
-        Pr    % Reference pressure
+        L0           % Initial Length[Input]
+        D0           % Initial Thickness[Input]
+        tau0         % Reference Stress[Input]
+        n            % Stress exponent[Input]
+        eta0DS       % Reference diffusion creep viscosity Slab[Input]
+        eta0DUM      % Reference diffusion creep viscosity Upper Mantle[Input]
+        xiUM         % Viscosity contrast between diffusion and dislocation at reference condition of the upper mantle[Input]
+        xiUS         % Viscosity contrast between diffusion and dislocation at reference condition of the Slab[Input]
+        eps_c        % Characteristic strain rate[Input]
+        Lambda       % Initial Lambda[Input]
+        Psi          % Viscosity contrast at reference condition between mantle and slab [Input]
+        s            % Length scale of the convection[Input]
+        tc           % Characteristic timescale [Input]
+        tc_drag      % Characteristic timescale using the drag stress[numeric]
+        tdet         % Detachment time (t/tc)[numeric]
+        tau_det      % tau at the detachment[numeric] 
+        tau_max      % tau max [numeric]
+        time_tau_max % time at which the tau max is happening[numeric]
+        tau_real_initial % initial stress at the initial stage[numeric]
+        tau_drag_initial % initial drag stress [numeric]
+        T_Slab % Field that is useful for the realistic case: the average temperature of the slab in Kelvin[Input]
+        Tp    % Mantle potential temperature[Input]
+        Vn    % Activaction volume [Input]
+        Vd    % Activaction volume [Input]
+        Cd    % Exponential factor diffusion[Input]
+        Cn    % Exponential factor dislocation[Input]
+        phi   % adiabatic gradient[Input]
+        w     % weight force[Input]
+        Pr    % Reference pressure[Input]
+        Lambda0 % initial Lambda [Numeric]
+        BdUM % Diffusion creep exponential factor[Input]
+        BnUM % Dislocation creep exponential factor[Input]
+        BdS % Diffusion creep exponential factor[Input]
+        BnS % Dislocation creep exponential factor [Input]
+        tau_um_0 % initial stress of the upper mantle [Numeric]
+        xdisl % initial partition of dislocation diffusion creep [Numeric]
+        eps_um_0 %initial strain rate of the upper mantle [Numeric]
+        dDdt_0 %initial dDdt at the beginning of the simulation [Numeric]
+        eta_um_0 % initial upper mantle viscosity [Numeric]
+        tau_mc % characteristic mantle length scale [Numeric/Input]
+        max_step % resolution of the timestep implicit model
+        iteration % how many time do I need to use the quick hack
+        Failed %flag of the test
     end
 
     methods

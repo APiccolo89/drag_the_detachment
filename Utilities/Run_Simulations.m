@@ -52,7 +52,7 @@ for i=1:n_tests
    
     Tests.(T_name)=Temp;
     
-    disp([num2str(i),'out of',num2str(n_tests), 'tests'])
+    %disp([num2str(i),'out of',num2str(n_tests), 'tests'])
 end
 toc
 end
