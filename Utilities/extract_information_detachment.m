@@ -79,6 +79,8 @@ for k = 1:numel(F)
 
         if nlm.iteration > 0
             Data_S.xdisl(i)   = TD.eps_mantle(1,1)./TD.eps_mantle(3,1); 
+            Data_S.xdisl_mean(i) = mean(TD.eps_mantle(1,:)./TD.eps_mantle(3,:));
+            Data_S.xdisl_max(i) = max(TD.eps_mantle(1,:)./TD.eps_mantle(3,:));
             Data_S.tau_um_0(i) = TD.tau_mantle(1);
             Data_S.eps_um_0(i) = TD.eps_mantle(3,1);
             Data_S.eta_um_0(i) = TD.eta_um(1);
@@ -101,6 +103,8 @@ for k = 1:numel(F)
             Data_S.eps_um_0(i) = nan;
             Data_S.eta_um_0(i) = nan;
             Data_S.tau_mc(i) = nan;
+            Data_S.xdisl_mean(i) = nan;
+            Data_S.xdisl_max(i) = nan;
 
         end
 

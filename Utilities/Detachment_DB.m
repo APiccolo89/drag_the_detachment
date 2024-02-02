@@ -40,6 +40,8 @@ classdef Detachment_DB < handle
         BnS % Dislocation creep exponential factor [Input]
         tau_um_0 % initial stress of the upper mantle [Numeric]
         xdisl % initial partition of dislocation diffusion creep [Numeric]
+        xdisl_mean %mean value of xdisl 
+        xdisl_max %max value of xdisl 
         eps_um_0 %initial strain rate of the upper mantle [Numeric]
         dDdt_0 %initial dDdt at the beginning of the simulation [Numeric]
         eta_um_0 % initial upper mantle viscosity [Numeric]

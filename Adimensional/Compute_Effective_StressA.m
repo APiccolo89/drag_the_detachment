@@ -161,5 +161,6 @@ else
     B_d_u = 1/(2*ID.eta_CFU);
     res = (eps-(B_d_m*tau+B_n_m*tau^n+B_d_u*tau));
 end
+    res = res./eps;
 end
 

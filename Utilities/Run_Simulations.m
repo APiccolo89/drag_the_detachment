@@ -36,7 +36,7 @@ n_tests = length(ium(:));
 disp(['=============================================================='])
 disp(['Number of tests is ',num2str(n_tests)])
 disp(['=============================================================='])
-
+pause(2)
 for i=1:n_tests
     % Extract data for the test
     T_name   = strcat('T_',num2str(i));
@@ -50,9 +50,7 @@ for i=1:n_tests
     
     [Temp]   = Processing_simulation(eta0DS,xiUS,n,l0,s0,D0,eta0DM,Benchmark,xiUM,nlm);
    
-    Tests.(T_name)=Temp;
-    
-    %disp([num2str(i),'out of',num2str(n_tests), 'tests'])
+    Tests.(T_name)=Temp;  
 end
 toc
 end

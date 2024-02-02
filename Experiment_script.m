@@ -67,61 +67,55 @@ nlm = Problem_type;
 nlm.Linear=0;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
 nlm.iteration = 1;
 nlm.cut_off   = 0;
+
 if nlm.islinear == 1
     ptsave = ['../Tests_Results_LINEAR'];
 
 else
     ptsave = ['../Tests_Results_NLINEAR'];
 
-end
+end 
 xiUM_v = [];
-Psi =0; %Flag for focussing on high drag coefficient condition
-Lambda_input = 0; 
+Limit_scenario = 'NonLinear_Regime_Main';
 
-% Linear Test Manuscript
-if nlm.islinear == 1
-    %Geometric properties of the Slab
-    l0_v      = (300e3:100e3:600e3);         % initial length [m](300e3:50e3:600e3);
-    D0_v      = 80e3;                       % thickness [m]
-    s0_v      = [60e6:10e6:240e6];        % reference buoyancy stress [Pa]
-    % Slab Rheology
-    eta0DS_v  = 10.^[22.5:0.5:26];                      % [Pas] reference diffusion creep viscosity of the slab
-    xiUS_v     = [1.0,10.0,50.0];               % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
-    n_v       = [2.0,3.5,5.0];            % [n.d.] pre-exponential factor
-    % Upper Mantle
-    eta0DM_v  = 10.^[18:0.5:21.0];                       % [Pas] reference diffusion creep viscosity of the upper mantle
-end
-if nlm.islinear==0
-
-    if Psi == 0
+switch Limit_scenario
+    case 'Linear_Regime_Main' % xim < 1e-6
         %Geometric properties of the Slab
         l0_v      = (300e3:50e3:600e3);         % initial length [m]
         D0_v      = 80e3;                      % thickness [m]
         s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
         % Slab Rheology
         eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
-        xiUS_v     = 10.^[3,6];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+        xiUS_v     = 10.^[0.0,1.0,2.0,6.0];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
         n_v        = [3.5];            % [n.d.] pre-exponential factor
         % Upper Mantle
-        eta0DM_v  = 10.^[21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
-        xiUM_v    = 10.^[-10,-8,-6,-2,-1,0,1,2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
-    else
-        %Geometric properties of the Slab
+        eta0DM_v  = 10.^[19,20,21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
+        xiUM_v    = 10.^[-12,-10,-8,-6,-4];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+
+    case 'Transition_Regime_Main' % xim >1e-6 & xim<1e6
         l0_v      = (300e3:50e3:600e3);         % initial length [m]
         D0_v      = 80e3;                      % thickness [m]
         s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
         % Slab Rheology
-        eta0DS_v   = 10.^[22,24];                      % [Pas] reference diffusion creep viscosity of the slab
-        xiUS_v     = 10.^[4];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+        eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
+        xiUS_v     = 10.^[0.0,1.0,2.0,6.0];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
         n_v        = [3.5];            % [n.d.] pre-exponential factor
         % Upper Mantle
-        eta0DM_v  = 10.^[20,21,22,24];                       % [Pas] reference diffusion creep viscosity of the upper mantle
-        xiUM_v    = 10.^[-2,-1,0,1,2,3,4,6];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
-    end
+        eta0DM_v  = 10.^[19,20,21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
+        xiUM_v    = 10.^[-2,-1,0,1,2];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+
+    case 'NonLinear_Regime_Main'
+        l0_v      = (300e3:50e3:600e3);         % initial length [m]
+        D0_v      = 80e3;                      % thickness [m]
+        s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
+        % Slab Rheology
+        eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
+        xiUS_v     = 10.^[0.0,1.0,2.0,6.0];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+        n_v        = [3.5];            % [n.d.] pre-exponential factor
+        % Upper Mantle
+        eta0DM_v  = 10.^[19,20,21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
+        xiUM_v    = 10.^[4,6,8,10,12];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
 end
-
-
-plot = 1;
 %==========================================================================
 
 for i=1:length(n_v)
@@ -133,8 +127,10 @@ for i=1:length(n_v)
     T.(strcat('n_',num2str(floor(n))))= Tests;
     Tests = [];
 end
-%%
+%% Save information into DataBase
 [Data_S] = extract_information_detachment(T,1,nlm);
+
+name_data_base = strcat('../Data_Base/',Limit_scenario,'_data_base_gamma_1000e3','.mat');
 
 initial_vectors.D0_v = D0_v;
 initial_vectors.eta0DM_v = eta0DM_v;
@@ -151,7 +147,7 @@ if nlm.islinear == 1
     number_tests = length(nTv(:));
     initial_vectors.number_tests = number_tests;
 else
-    filename_ = '../Data_Base/NonLinear_Tests_Data_Base_delta_L0.mat';
+    filename_ = name_data_base;
     [nTv,~] = ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,xiUS_v,xiUM_v,D0_v,n_v);
     number_tests = length(nTv(:));
     initial_vectors.number_tests = number_tests;

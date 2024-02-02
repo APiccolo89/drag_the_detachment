@@ -5,9 +5,10 @@ addpath('Utilities/')
 addpath('Utilities/Plot_Class/')
 addpath('Utilities/ScientificColourMaps8/')
 clf; 
-%%NonLinear_Tests_Data_Base_n3_iteration_high_T.mat It=load('NonLinear_Tests_Data_Base_n3_iteration.mat');
+%%NonLinear_Tests_Data_Base_n3_iteration_high_T.mat It=load('NonLinear_Tests_Data_Base_n3_iteration.mat');/NonLinear_Tests_Data_Base_delta_L0
+%It=load('..\Data_Base\NonLinear_Tests_Data_Base_n3_iteration_high_T_initial_guess.mat');
 
-It=load('..\Data_Base\NonLinear_Tests_Data_Base_n3_iteration_high_T_initial_guess.mat');
+It=load('..\Data_Base\NonLinear_Tests_Data_Base_delta_L0.mat');
 ptsave = '../NonLinearMantle_PP';
 
 %% Are the initial viscosities retrivable from the numerical data? 
@@ -19,7 +20,7 @@ Lambda  = S.Lambda;
 eta0um  = S.eta_um_0.*S.tc.*S.tau0; 
 eps0um  = S.eps_um_0;
 tau0um  = S.tau_um_0; 
-gamma   = (S.L0.*5.0)./2000e3;
+gamma   = (S.L0.*5.0)./(2*S.L0);
 xdisl0  = S.xdisl; 
 xium    = S.xiUM; 
 n       = S.n; 

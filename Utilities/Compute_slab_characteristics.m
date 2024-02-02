@@ -75,13 +75,13 @@ etaS_eff   = (1/eta0NS+1/(eta0DS))^(-1); % effective viscosity of the slab at re
 Psi        = eta0DM/etaS_eff;            % ratio between the upper mantle viscosity and the slab viscosity
 % Alpha
 alpha      = 5.0;                        % Ancient parameter derived by Yanick et al. 1986
-s          = 1000e3;                     % Convective length scale
+s          = 1000e3;%1000e3                     % Convective length scale
 len        = l0/(2*s);                   % Length divided by a characteristic lenght scale (i.e. size of my model)
 Lambda     = len*alpha*Psi;              % Parameter derived by 2D numerical simulation
 B_n_um     = (s0^(1-n))/(2*eta0NM);      % B_n of the upper mantle (in case the problem is non linear)
 B_d_um     = 1/(2.*eta0DM);
 ID.eta_CF = 1e18;                        % switch to 1.0 when the use wants to not deal with it.
-ID.B_D_C      = 1./(2.*ID.eta_CF);
+ID.B_D_C      = 1./(2.*ID.eta_CF);  
 ID.eta_CFU = 1e24;
 ID.B_D_CU = 1./(2.*ID.eta_CFU);
 ID.nlm  = nlm;
