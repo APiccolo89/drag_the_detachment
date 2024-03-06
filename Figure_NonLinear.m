@@ -224,7 +224,7 @@ filename = fullfile(path_save,figure_name);
 
 exportgraphics(f,filename,'Resolution',1000,'BackgroundColor','white')         
 
-
+print(f,filename,'-dpng','-r0')
 
 
 
@@ -235,9 +235,9 @@ exportgraphics(f,filename,'Resolution',1000,'BackgroundColor','white')
 function [ax] = set_default_Lambda(ax)
 ax.XScale = 'log';
 ax.XColor = [0,0,0];
-ax.XLim = [10^(-6),50];
-ax.XTick = [10^(-4),10^0];
-ax.XTickLabel = {'$10^{-4}$','$10^{0}$'};
+ax.XLim = [10^(-8),50];
+ax.XTick = [10^(-6),10^(-4),10^0];
+ax.XTickLabel = {'$10^{-6}$','$10^{-4}$','$10^{0}$'};
 ax.XLabel.String = '$\Lambda_0$';
 ax.XLabel.Position(2)=-0.10;
 ax.XLabel.Interpreter = 'latex';

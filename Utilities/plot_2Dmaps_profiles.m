@@ -33,51 +33,66 @@ for ktest = 1:flength
         if strcmp(fnames{ktest},'T22')
             bla=0;
         end
-%         figure(1)
-%         clf;
-%         ax = gca;
-%         pcolor(t,z,D_m(1:length(t),:)'./80);shading flat; colorbar;
-%         colorbar;
-%         caxis([0.1,1.0])
-%         colormap(crameri('nuuk',27))
-%         hold on
-%         ylim([-300,-100])
-%         ax.Box = 'on';
-%         ax.LineWidth = 1.2;
-%         ax.XColor = [0 0 0 ];
-%         ax.YColor = [0 0 0 ];
-%         ax.XGrid = 'on';
-%         ax.YGrid = 'on';
-%         ax.Layer = 'top';
-%         figure_name = fnames{ktest};
-%         pt_fig = fullfile(pt_save,figure_name);
-%         print(pt_fig,'-dpng','-r600');
-%         bla =0;
-% 
-%         figure(2)
-%         clf;
-%         ax = gca;
-%         hold on
-% 
-%         plot(D_mv./80,z,'k')
-%         plot(DD./80,x,'r','LineWidth',1.2)
-%         yline(TB.(fnames{ktest}).Dp2-100,Color='b',LineStyle=':',LineWidth=1.2)
-%         yline(-100-TB.(fnames{ktest}).f(1).*TB.(fnames{ktest}).P_Var.L0./1e3,Color='r',LineStyle='--',LineWidth=1.2);
-%         hold on
-%         yline(TB.(fnames{ktest}).Dp2-100,Color='b',LineStyle=':',LineWidth=1.2)
-%         yline(-100-TB.(fnames{ktest}).f(1).*TB.(fnames{ktest}).P_Var.L0./1e3,Color='r',LineStyle='--',LineWidth=1.2)
-%         xlim([0.01,0.9])
-%         ylim([-300,-100])
-%         ax.Box = 'on';
-%         ax.LineWidth = 1.2;
-%         ax.XColor = [0 0 0 ];
-%         ax.YColor = [0 0 0 ];
-%         ax.XGrid = 'on';
-%         ax.YGrid = 'on';
-%         figure_name = strcat(figure_name,'profile');
-%         pt_fig = fullfile(pt_save,figure_name);
-%         print(pt_fig,'-dpng','-r600');
-% 
+        figure(1)
+        clf;
+        ax = gca;
+        pcolor(t,z,D_m(1:length(t),:)'./80);shading flat; colorbar;
+        hold on
+        plot(t,x,'LineStyle',':',"Color",'#9a2a3c','LineWidth',2.0)
+        colorbar;
+        caxis([0.1,1.0])
+        colormap(crameri('nuuk',27))
+        hold on
+        ylim([-300,-100])
+        ax.Box = 'on';
+        ax.LineWidth = 1.2;
+        ax.XColor = [0 0 0 ];
+        ax.YColor = [0 0 0 ];
+        ax.TickLabelInterpreter = 'latex';
+        ax.FontUnits = 'centimeters';
+        ax.FontSize = 0.5;
+        ax.YLabel.String = '$z$, [$km$]';
+        ax.YLabel.Interpreter = 'latex';
+        ax.XLabel.String = '$t^{\dagger}$';
+        ax.XLabel.Interpreter = 'latex';
+
+        ax.XGrid = 'on';
+        ax.YGrid = 'on';
+        ax.Layer = 'top';
+        cbar = colorbar(ax,"eastoutside");
+        cbar.Label.String = '$D^{\dagger}$';
+        cbar.Label.Interpreter = "latex";
+        cbar.Color = [0 0 0];
+        cbar.TickLabelInterpreter = 'latex';
+        figure_name = fnames{ktest};
+        pt_fig = fullfile(pt_save,figure_name);
+        print(pt_fig,'-dpng','-r600');
+        bla =0;
+
+        figure(2)
+        clf;
+        ax = gca;
+        hold on
+
+        plot(D_mv./80,z,'k')
+        plot(DD./80,x,'r','LineWidth',1.2)
+        yline(TB.(fnames{ktest}).Dp2-100,Color='b',LineStyle=':',LineWidth=1.2)
+        yline(-100-TB.(fnames{ktest}).f(1).*TB.(fnames{ktest}).P_Var.L0./1e3,Color='r',LineStyle='--',LineWidth=1.2);
+        hold on
+        yline(TB.(fnames{ktest}).Dp2-100,Color='b',LineStyle=':',LineWidth=1.2)
+        yline(-100-TB.(fnames{ktest}).f(1).*TB.(fnames{ktest}).P_Var.L0./1e3,Color='r',LineStyle='--',LineWidth=1.2)
+        xlim([0.01,0.9])
+        ylim([-300,-100])
+        ax.Box = 'on';
+        ax.LineWidth = 1.2;
+        ax.XColor = [0 0 0 ];
+        ax.YColor = [0 0 0 ];
+        ax.XGrid = 'on';
+        ax.YGrid = 'on';
+        figure_name = strcat(figure_name,'profile');
+        pt_fig = fullfile(pt_save,figure_name);
+        print(pt_fig,'-dpng','-r600');
+
 %         figure(3)
 %         hold on
         buf1 = -100-TB.(fnames{ktest}).f(1).*TB.(fnames{ktest}).P_Var.L0./1e3;

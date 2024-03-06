@@ -35,7 +35,7 @@ Df_S=10;
 
 nlm = Problem_type;
 
-nlm.Linear=1;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+nlm.Linear=0;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
 
 nlm.iteration = 1; % Iterate for the stress
  
@@ -47,7 +47,7 @@ DB_path = '../Data_Base/Test_DB2.hdf5'; % Database path
 
 pt_save = '..\Viscous_DRAG\Manuscript\New_Fit_Definitive\';
 
-file_name_table = 'Linear_Experiment_Table1';
+file_name_table = 'Table_Experiments';
 
 pt_Table = fullfile(pt_save,file_name_table);
 
@@ -65,19 +65,24 @@ end
 
 
 l = h5info(DB_path,'/Viscous/HR');
+l2 = h5info(DB_path,'/Viscous/HR_DIS');
 
 TestsA  = {l.Groups.Name};
+TestsB = {l2.Groups.Name};
 
-HR = 1:length(TestsA);
+Dif = ones(length(TestsA),1);
+Dis = zeros(length(TestsB),1);
 
-Res = [HR];
+Res = [];
 
-Tests   = [TestsA];
+Rheo = [Dif;Dis];
 
-[TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,1,matlab_version);
+Tests   = [TestsA,TestsB];
 
-NLN_fetches1 = struct('TB',TB,'FIT',FIT);
+[TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,2,matlab_version,Rheo);
 
-[Table,L,td_rel_E]=Create_Table_Latex(TB,Res,0,pt_Table);
+NLN_fetches2 = struct('TB',TB,'FIT',FIT);
 
-save('Data_Base_Fit.mat','NLN_fetches1','-append');
+[Table,L,td_rel_E]=Create_Table_Latex(TB,Res,2,pt_Table);
+
+save('Data_Base_Fit_DEF.mat','NLN_fetches2');

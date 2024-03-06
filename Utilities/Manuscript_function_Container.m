@@ -240,9 +240,9 @@ classdef Manuscript_function_Container
             V = zeros(size_tests,1);
             for i = 1:size_tests
                 if log==1
-                    V(i) = (log10(c(1,i))-z_min)/(z_max-z_min);
+                    V(i) = (log10(c(i))-z_min)/(z_max-z_min);
                 else
-                    V(i) = ((c(1,i))-z_min)/(z_max-z_min);
+                    V(i) = ((c(i))-z_min)/(z_max-z_min);
                 end
                 if V(i)<0
                     V(i)=0;

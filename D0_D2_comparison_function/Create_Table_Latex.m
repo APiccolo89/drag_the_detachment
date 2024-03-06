@@ -61,7 +61,7 @@ for i = 1:length(field_names)
     end
 end
 if fetch ==2 
-        Table = table(td_rel_err',fit_par1',fit_par2',Res');
+    Table = table(Lambda',xiUM',xiS',eta0DM',eta0DS',tau0',L0',tc',td_2D',td_0D',td_rel_err',fit_par1',fit_par2',Res');
 
 else
     Table = table(Lambda',xiUM',xiS',eta0DM',eta0DS',tau0',L0',tc',td_2D',td_0D',td_rel_err',fit_par',Res',R');
@@ -70,7 +70,6 @@ Table.Properties.RowNames = field_names;
 % Use the 
 
 table2latex(Table, pt_save)
-
 
 end
 

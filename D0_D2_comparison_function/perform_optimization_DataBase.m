@@ -1,7 +1,7 @@
-function [TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,number_fetch,matlab_version)
+function [TB,FIT] = perform_optimization_DataBase(Tests,n,D0,Df_S,nlm,Df_UM,DB_path,pt_save,Res,number_fetch,matlab_version,Rheo)
 
 suc = 1;
-
+counter_dif = 0; 
 for ktest=1:1:length(Tests)
 
     time_A = cputime;
@@ -9,6 +9,10 @@ for ktest=1:1:length(Tests)
     Chosen = Tests{ktest};
 
     [P_Var,D,t,Tau,d,tdet,topo,tauL,d2,D_matrix] = Reading_Data_Base(Chosen,DB_path,Df_S,nlm);
+
+    if Rheo(ktest)==1
+        P_Var.xiUM = 10e-12;
+    end
 
     [ID] = Compute_slab_characteristics(P_Var.eta0DS,Df_S,n,P_Var.L0,P_Var.s0,D0,P_Var.eta0DM,P_Var.xiUM,nlm);
 
@@ -96,7 +100,7 @@ for ktest=1:1:length(Tests)
         FIT.Dp2(suc) = d2;
         FIT.Detachment(1,suc) = n*TestData.t_det;
         FIT.Detachment(2,suc) = tdet;
-        FIT.Res(suc)= Res(ktest);
+        FIT.Res(suc)= 1;
         FIT.res_gf(suc)=res_gf;
         Detachment_0D = n*TestData.t_det;
         Detachment_2D = tdet;
@@ -105,18 +109,8 @@ for ktest=1:1:length(Tests)
 
         suc = suc+1;
   
-        if number_fetch >1
-            figure(3);
-            ax = gca;
-            ax.XColor = [0,0,0];
-            ax.YColor = [0,0,0];
-            ax.LineWidth = 1.2;
-            ax.Box     = 'on';
-            filename=(['T_2f',num2str(ktest),'.png']);
-            pt = fullfile(pt_save,filename);
-            print(pt,'-dpng','-r0')
-            clf;
-        end
+    
+        
     else
         disp('=====================================================================')
         disp(['You cannot optimize a failure, but, i can give you motivational tips:'])
@@ -134,30 +128,38 @@ for ktest=1:1:length(Tests)
         t0D   = [];
 
     end
+    if Rheo(ktest) == 1
+        counter_dif = counter_dif+1;
+        test_nr = ktest;
+    else 
+        test_nr = ktest-counter_dif;
+    end
 
+    test_name = strcat('T_',num2str(Rheo(ktest)),'_',num2str(test_nr));
+    disp(test_name);
 
-    TB.(strcat('T',num2str(ktest))).ID = ID.ID_A;
-    TB.(strcat('T',num2str(ktest))).tc = ID.tc;
-    TB.(strcat('T',num2str(ktest))).P_Var = P_Var;
-    TB.(strcat('T',num2str(ktest))).D = D;
-    TB.(strcat('T',num2str(ktest))).t = t;
-    TB.(strcat('T',num2str(ktest))).t0D =t0D;
-    TB.(strcat('T',num2str(ktest))).tau0D= tau0D;
-    TB.(strcat('T',num2str(ktest))).tau = Tau;
-    TB.(strcat('T',num2str(ktest))).topo = topo;
-    TB.(strcat('T',num2str(ktest))).D0D2 = D_0D2D;
-    TB.(strcat('T',num2str(ktest))).D_matrix = D_matrix;
-    TB.(strcat('T',num2str(ktest))).f = f;
-    TB.(strcat('T',num2str(ktest))).res = res;
-    TB.(strcat('T',num2str(ktest))).Detachment_0D = Detachment_0D;
-    TB.(strcat('T',num2str(ktest))).Detachment_2D = Detachment_2D;
-    TB.(strcat('T',num2str(ktest))).tauL = tauL;
-    TB.(strcat('T',num2str(ktest))).Dp2 = d2;
+    TB.(test_name).ID = ID.ID_A;
+    TB.(test_name).tc = ID.tc;
+    TB.(test_name).P_Var = P_Var;
+    TB.(test_name).D = D;
+    TB.(test_name).t = t;
+    TB.(test_name).t0D =t0D;
+    TB.(test_name).tau0D= tau0D;
+    TB.(test_name).tau = Tau;
+    TB.(test_name).topo = topo;
+    TB.(test_name).D0D2 = D_0D2D;
+    TB.(test_name).D_matrix = D_matrix;
+    TB.(test_name).f = f;
+    TB.(test_name).res = res;
+    TB.(test_name).Detachment_0D = Detachment_0D;
+    TB.(test_name).Detachment_2D = Detachment_2D;
+    TB.(test_name).tauL = tauL;
+    TB.(test_name).Dp2 = d2;
     if isempty(f)
-        TB.(strcat('T',num2str(ktest))).Dp = nan;
+        TB.(test_name).Dp = nan;
 
     else
-        TB.(strcat('T',num2str(ktest))).Dp = -f(1)*2*P_Var.L0./1e3;
+        TB.(test_name).Dp = -f(1)*2*P_Var.L0./1e3;
     end
     B = cputime;
     time_ktest = (B-time_A)/60;
