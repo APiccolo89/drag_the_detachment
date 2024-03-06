@@ -60,10 +60,13 @@ Benchmark = 0.0 ; % Benchmark activaction flag
 % Folder output:
 ptsave = ['../Tests_Results_LINEAR'];
 % if the folder does not exist, create the folder.
-if not(isfolder(ptsave))
+if not(isdir(ptsave))
     mkdir(ptsave)
 end
-nlm       = Problem_type.NonLinear;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+nlm = Problem_type;
+nlm.Linear=0;   % Switching the position of linear-non_linear activate the non linear upper mantle routine.
+nlm.iteration = 1;
+nlm.cut_off   = 0;
 if nlm.islinear == 1
     ptsave = ['../Tests_Results_LINEAR'];
 
@@ -72,6 +75,9 @@ else
 
 end
 xiUM_v = [];
+Psi =0; %Flag for focussing on high drag coefficient condition
+Lambda_input = 0; 
+
 % Linear Test Manuscript
 if nlm.islinear == 1
     %Geometric properties of the Slab
@@ -86,17 +92,32 @@ if nlm.islinear == 1
     eta0DM_v  = 10.^[18:0.5:21.0];                       % [Pas] reference diffusion creep viscosity of the upper mantle
 end
 if nlm.islinear==0
-    %Geometric properties of the Slab
-    l0_v      = (300e3:50e3:600e3);         % initial length [m]
-    D0_v      = 80e3;                      % thickness [m]
-    s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
-    % Slab Rheology
-    eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
-    xiUS_v     = 10.^[2,4,6,8,10];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
-    n_v        = [3.5,5.0];            % [n.d.] pre-exponential factor
-    % Upper Mantle
-    eta0DM_v  = 10.^[21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
-    xiUM_v    = 10.^[-2,-1,0,1,2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+
+    if Psi == 0
+        %Geometric properties of the Slab
+        l0_v      = (300e3:50e3:600e3);         % initial length [m]
+        D0_v      = 80e3;                      % thickness [m]
+        s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
+        % Slab Rheology
+        eta0DS_v   = 10.^[22,24,26,28,30];                      % [Pas] reference diffusion creep viscosity of the slab
+        xiUS_v     = 10.^[3,6];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+        n_v        = [3.5];            % [n.d.] pre-exponential factor
+        % Upper Mantle
+        eta0DM_v  = 10.^[21,22,23];                       % [Pas] reference diffusion creep viscosity of the upper mantle
+        xiUM_v    = 10.^[-10,-8,-6,-2,-1,0,1,2,4,6,8,10];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+    else
+        %Geometric properties of the Slab
+        l0_v      = (300e3:50e3:600e3);         % initial length [m]
+        D0_v      = 80e3;                      % thickness [m]
+        s0_v      = [60e6:30e6:240e6];        % reference buoyancy stress [Pa]
+        % Slab Rheology
+        eta0DS_v   = 10.^[22,24];                      % [Pas] reference diffusion creep viscosity of the slab
+        xiUS_v     = 10.^[4];              % [n.d.]viscosity contrast between diffusion and dislocation creep at the reference stress
+        n_v        = [3.5];            % [n.d.] pre-exponential factor
+        % Upper Mantle
+        eta0DM_v  = 10.^[20,21,22,24];                       % [Pas] reference diffusion creep viscosity of the upper mantle
+        xiUM_v    = 10.^[-2,-1,0,1,2,3,4,6];                  % [n.d.] viscosity contrast between diffusion and dislocation creep at reference stress (UM)
+    end
 end
 
 
@@ -124,16 +145,16 @@ initial_vectors.xiUM_v = xiUM_v;
 initial_vectors.xiUS_v = xiUS_v;
 initial_vectors.s0_v   = s0_v;
 if nlm.islinear == 1
-    filename_ = 'Linear_Tests_Data_Base.mat';
-    xiUM_v = 0; 
+    filename_ = '../Data_Base/Linear_Tests_Data_Base.mat';
+    xiUM_v = 0;
     [nTv,~] = ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,xiUS_v,xiUM_v,D0_v,n_v);
-    number_tests = length(nTv(:)); 
-    initial_vectors.number_tests = number_tests; 
+    number_tests = length(nTv(:));
+    initial_vectors.number_tests = number_tests;
 else
-    filename_ = 'NonLinear_Tests_Data_Base_n3.mat';
+    filename_ = '../Data_Base/NonLinear_Tests_Data_Base_delta_L0.mat';
     [nTv,~] = ndgrid(eta0DM_v,s0_v,eta0DS_v,l0_v,xiUS_v,xiUM_v,D0_v,n_v);
-    number_tests = length(nTv(:)); 
-    initial_vectors.number_tests = number_tests; 
+    number_tests = length(nTv(:));
+    initial_vectors.number_tests = number_tests;
 end
 n_3 = T.n_3;
-save(filename_,"Data_S","n_3","initial_vectors")
+save(filename_,'Data_S','n_3','initial_vectors')

@@ -9,12 +9,12 @@
 %=========================================================================%
 clear all
 close all
-addpath ../Realistic_Case/
+addpath('../Realistic_Case/')
 close all
 set(0,'defaultTextInterpreter','latex'); %trying to set the default
 
 % Reference values:
-Tp    = 1400+273.15;
+Tp    = 1350+273.15;
 Pr    = 3300*100e3*9.81;
 t0    = nan;
 Vnv   = [0:1:30].*1e-6;

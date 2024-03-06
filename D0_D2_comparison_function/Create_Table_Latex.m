@@ -52,10 +52,8 @@ for i = 1:length(field_names)
         td_rel_err{i} =sprintf('%0.2f', abs((T.Detachment_2D-T.Detachment_0D)./(T.Detachment_2D))*100);
         td_rel_E(i) = abs((T.Detachment_2D-T.Detachment_0D)./(T.Detachment_2D))*100; 
         if fetch ==2 
-                    fit_par1{i} = sprintf('%0.2f',T.f(1));
-                                        fit_par2{i} = sprintf('%0.2f',T.f(2));
-
-
+        fit_par1{i} = sprintf('%0.2f',T.f(1));
+        fit_par2{i} = sprintf('%0.2f',T.f(2));
         else
         fit_par{i} = sprintf('%0.2f',T.f);
         end
@@ -63,7 +61,7 @@ for i = 1:length(field_names)
     end
 end
 if fetch ==2 
-        Table = table(td_rel_err',fit_par1',fit_par2',Res');
+    Table = table(Lambda',xiUM',xiS',eta0DM',eta0DS',tau0',L0',tc',td_2D',td_0D',td_rel_err',fit_par1',fit_par2',Res');
 
 else
     Table = table(Lambda',xiUM',xiS',eta0DM',eta0DS',tau0',L0',tc',td_2D',td_0D',td_rel_err',fit_par',Res',R');
@@ -72,7 +70,6 @@ Table.Properties.RowNames = field_names;
 % Use the 
 
 table2latex(Table, pt_save)
-
 
 end
 
